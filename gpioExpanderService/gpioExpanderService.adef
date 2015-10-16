@@ -1,0 +1,24 @@
+
+sandboxed: false
+start: auto
+
+executables:
+{
+    gpioExpanderService = ( gpio )
+}
+
+processes:
+{
+    run:
+    {
+        ( gpioExpanderService )
+    }
+}
+
+provides:
+{
+    api:
+    {
+        gpioExpanderService.gpio.mangoh_gpioExpander
+    }
+}

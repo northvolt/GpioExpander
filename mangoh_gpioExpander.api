@@ -1,0 +1,308 @@
+//--------------------------------------------------------------------------------------------------
+/**
+ * @page c_gpio Gpio Definitions
+ *
+ * @ref le_gpio_interface.h "API Reference"
+ *
+ * <HR>
+ *
+ * The GPIO API is used by apps to control gpio Input/Output.
+ *
+ * GPIO BSP service.
+ *
+ * This file defines GPIO API control definitions.
+ *
+ * <HR>
+ *
+ * Copyright (C) Sierra Wireless Inc. Use of this work is subject to license.
+ */
+//--------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * @file le_gpio_interface.h
+ *
+ * Legato @ref c_gpio include file.
+ *
+ * Copyright (C) Sierra Wireless Inc. Use of this work is subject to license.
+ */
+//-------------------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Reference to a GPIO iterator object.
+ */
+//--------------------------------------------------------------------------------------------------
+REFERENCE Gpio;
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The pin IO definition of GPIO Expander1: IC U903.
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM Exp1Pin
+{
+    EXP1_PIN_ARDUINO_RESET_LEVEL,     ///< GPIO Expander1 IO_0 : Arduino
+    EXP1_PIN_BATTCHRGR_PG_N,          ///< GPIO Expander1 IO_1 : Battery Charger
+    EXP1_PIN_BATTGAUGE_GPIO,          ///< GPIO Expander1 IO_2 : Battery Charger
+    EXP1_PIN_LED_ON,                  ///< GPIO Expander1 IO_3 : LED
+    EXP1_PIN_ATMEGA_RESET_GPIO,       ///< GPIO Expander1 IO_4 : Arduino
+    EXP1_PIN_CONNECT_TO_AV_LED,       ///< GPIO Expander1 IO_5 : AV connectivity
+    EXP1_PIN_PCM_ANALOG_SELECT,       ///< GPIO Expander1 IO_6 : Audio
+    EXP1_PIN_CONNECT_TO_AV,           ///< GPIO Expander1 IO_7 : AV connectivity
+    EXP1_PIN_BOARD_REV_RES1,          ///< GPIO Expander1 IO_8 : Board boot up
+    EXP1_PIN_BOARD_REV_RES2,          ///< GPIO Expander1 IO_9 : Board boot up
+    EXP1_PIN_UART_EXP1_ENN,           ///< GPIO Expander1 IO_10: IOT0,1
+    EXP1_PIN_UART_EXP1_IN,            ///< GPIO Expander1 IO_11: IOT0,1
+    EXP1_PIN_UART_EXP2_IN,            ///< GPIO Expander1 IO_12: IOT2, console
+    EXP1_PIN_SDIO_SEL,                ///< GPIO Expander1 IO_13: SD card/IOT0
+    EXP1_PIN_SPI_EXP1_ENN,            ///< GPIO Expander1 IO_14: IOT0,1
+    EXP1_PIN_SPI_EXP1_IN              ///< GPIO Expander1 IO_15: IOT0,1
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The pin IO definition of GPIO Expander2: IC U906.
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM Exp2Pin
+{
+    EXP2_PIN_IOT0_GPIO3,              ///< GPIO Expander2 IO_0 : IOT0 GPIO3
+    EXP2_PIN_IOT0_GPIO2,              ///< GPIO Expander2 IO_1 : IOT0 GPIO2
+    EXP2_PIN_IOT0_GPIO1,              ///< GPIO Expander2 IO_2 : IOT0 GPIO1
+    EXP2_PIN_IOT1_GPIO3,              ///< GPIO Expander2 IO_3 : IOT1 GPIO3
+    EXP2_PIN_IOT1_GPIO2,              ///< GPIO Expander2 IO_4 : IOT1 GPIO2
+    EXP2_PIN_IOT1_GPIO1,              ///< GPIO Expander2 IO_5 : IOT1 GPIO1
+    EXP2_PIN_IOT2_GPIO3,              ///< GPIO Expander2 IO_6 : IOT2 GPIO3
+    EXP2_PIN_IOT2_GPIO2,              ///< GPIO Expander2 IO_7 : IOT2 GPIO2
+    EXP2_PIN_IOT2_GPIO1,              ///< GPIO Expander2 IO_8 : IOT2 GPIO1
+    EXP2_PIN_SENSOR_INT1,             ///< GPIO Expander2 IO_9 : Accelerometer/gyro
+    EXP2_PIN_SENSOR_INT2,             ///< GPIO Expander2 IO_10: Accelerometer/gyro
+    EXP2_PIN_CARD_DETECT_IOT0,        ///< GPIO Expander2 IO_11: IOT0
+    EXP2_PIN_CARD_DETECT_IOT2,        ///< GPIO Expander2 IO_12: IOT2
+    EXP2_PIN_CARD_DETECT_IOT1,        ///< GPIO Expander2 IO_13: IOT1
+    EXP2_PIN_SPI_EXP1_ENN,            ///< GPIO Expander2 IO_14: Expander
+    EXP2_PIN_SPI_EXP1_IN              ///< GPIO Expander2 IO_15: Battery Charger
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The pin IO definition of GPIO Expander3: IC U909.
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM Exp3Pin
+{
+    EXP3_PIN_USB_HUB_INTN,            ///< GPIO Expander3 IO_0 : USB Hub Int
+    EXP3_PIN_HUB_CONNECT,             ///< GPIO Expander3 IO_1 : Hub Connect
+    EXP3_PIN_GPIO_IOT2_RESET,         ///< GPIO Expander3 IO_2 : IOT2
+    EXP3_PIN_GPIO_IOT1_RESET,         ///< GPIO Expander3 IO_3 : IOT1
+    EXP3_PIN_GPIO_IOT0_RESET,         ///< GPIO Expander3 IO_4 : IOT0
+    EXP3_PIN_IOT0_GPIO4,              ///< GPIO Expander3 IO_5 : IOT0 GPIO4
+    EXP3_PIN_IOT1_GPIO4,              ///< GPIO Expander3 IO_6 : IOT1 GPIO4
+    EXP3_PIN_IOT2_GPIO4,              ///< GPIO Expander3 IO_7 : IOT2 GPIO4
+    EXP3_PIN_UART_EXP2_ENN,           ///< GPIO Expander3 IO_8 : IOT2 Console
+    EXP3_PIN_PCM_EXP1_ENN,            ///< GPIO Expander3 IO_9 : Onboard codec/IOT0 codec
+    EXP3_PIN_PCM_EXP1_SEL,            ///< GPIO Expander3 IO_10: Onboard codec/IOT0 codec
+    EXP3_PIN_ARD_FTDI,                ///< GPIO Expander3 IO_11: Arduino
+    EXP3_PIN_LCD_ON_OFF,              ///< GPIO Expander3 IO_12:
+    EXP3_PIN_FAST_SIM_SWITCH,         ///< GPIO Expander3 IO_13:
+    EXP3_PIN_ARDUINO_USB_CTRL,        ///< GPIO Expander3 IO_14:
+    EXP3_PIN_RS232_ENABLE             ///< GPIO Expander3 IO_15: RS232
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * When using GPIO pins we first need to specify in which mode we'd like to use it.
+ * There are three modes into which a pin can be set.
+ *
+ * The type of GPIO pin mode,  Input, Output.
+ *
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM PinMode
+{
+    PIN_MODE_OUTPUT,     ///< GPIO direction output mode, Assign a pin its value
+    PIN_MODE_INPUT,      ///< GPIO direction input mode, Poll a pin to get its value
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The type of GPIO level low or high.
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM ActiveType
+{
+    ACTIVE_TYPE_LOW,     ///< GPIO Active-Low
+    ACTIVE_TYPE_HIGH     ///< GPIO Active-High, output signal is 1
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The type of GPIO pullup, pulldown.
+ *
+ * PULLUPDOWN_TYPE_OFF:  pullup disable and pulldown disable
+ * PULLUPDOWN_TYPE_DOWN: pullup disable and pulldown enable
+ * PULLUPDOWN_TYPE_UP:   pullup enable and pulldown disable
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM PullUpDownType
+{
+    PULLUPDOWN_TYPE_OFF,   ///< GPIO both pullup and pulldown disable
+    PULLUPDOWN_TYPE_DOWN,  ///< GPIO pulldown
+    PULLUPDOWN_TYPE_UP     ///< GPIO pullup
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The mode of GPIO Edge Sensivity.
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM EdgeSensivityMode
+{
+    EDGE_SENSE_NONE,      ///< None
+    EDGE_SENSE_RISING,    ///< Rising
+    EDGE_SENSE_FALLING,   ///< Faling
+    EDGE_SENSE_BOTH       ///< Both
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * The operation of GPIO open drain
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM OpenDrainOperation
+{
+    PUSH_PULL_OP,         ///< Regular push-pull operaion.
+    OPEN_DRAIN_OP         ///< Open drain operation.
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Request GPIO object from GPIO function module and GPIO pin number.
+ *
+ * @return This will return a newly created gpio reference.
+ * - NULL: Function failed to get gpio reference or anything wrong
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION Gpio Request
+(
+    uint8 module             IN,  ///< For GPIO Expander, the module must be 1, 2, or 3.
+    uint8 pinNum             IN   ///< GPIO pin number of use.
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Release this GPIO object resource.
+ *
+ * @return LE_FAULT       Function failed to release object.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t Release
+(
+    Gpio gpioRef             IN   ///< GPIO module object reference.
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Setup GPIO Direction INPUT or OUTPUT mode.
+ *
+ * @return LE_FAULT       Function failed to setup direction mode.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t SetDirectionMode
+(
+    Gpio gpioRef             IN,  ///< GPIO module object reference.
+    PinMode mode             IN   ///< The type of GPIO pin mode,  Input, Output.
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Setup GPIO pullup/pulldown.
+ *
+ * @return LE_FAULT       Function failed to setup pull up or pull down.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t SetPullUpDown
+(
+    Gpio gpioRef             IN,  ///< GPIO module object reference
+    PullUpDownType pud       IN   ///< The type of pullup, pulldown, off
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Setup GPIO OpenDrain.
+ *
+ * Enables open drain operation for each output-configured IO.
+ *
+ * Output pins can be driven in two different modes:
+ * - Regular push-pull operation: A transistor connects to high, and a transistor connects to low
+ *   (only one is operated at a time)
+ * - Open drain operation:  A transistor connects to low and nothing else
+ *
+ * @return LE_FAULT       Function failed to setup open drain.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t SetOpenDrain
+(
+    Gpio gpioRef             IN,  ///< GPIO module object reference
+    OpenDrainOperation drain IN   ///< The operation of GPIO open drain
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Setup GPIO Polarity.
+ *
+ * @return LE_FAULT       Function failed to setup polarity.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t SetPolarity
+(
+    Gpio gpioRef             IN,  ///< GPIO module object reference
+    ActiveType polarity      IN   ///< Active-high or active-low
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Rising or Falling of Edge sensitivity.
+ *
+ * @return LE_FAULT       Function failed to setup edge sense.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t SetEdgeSense
+(
+    Gpio gpioRef            IN,  ///< GPIO module object reference
+    EdgeSensivityMode edge  IN   ///< The mode of GPIO Edge Sensivity.
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Write value to GPIO output mode, low or high.
+ *
+ * @return LE_FAULT       Function failed to setup output mode.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t Output
+(
+    Gpio gpioRef           IN,  ///< GPIO module object reference
+    ActiveType value       IN   ///< Active-high or active-low
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Read value from GPIO input mode.
+ *
+ * @return This will return whether the pin is HIGH or LOW.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION ActiveType Input
+(
+    Gpio gpioRef           IN  ///< GPIO module object reference
+);
+

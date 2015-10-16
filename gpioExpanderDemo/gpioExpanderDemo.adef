@@ -1,0 +1,17 @@
+executables:
+{
+    gpioExpanderDemo = ( gpioPinComponent )
+}
+
+bindings:
+{
+    gpioExpanderDemo.gpioPinComponent.mangoh_gpioExpander -> gpioExpanderService.mangoh_gpioExpander
+}
+
+processes:
+{
+    run:
+    {
+        ( gpioExpanderDemo )
+    }
+}

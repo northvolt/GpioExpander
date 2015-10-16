@@ -1,0 +1,12 @@
+sources:
+{
+    gpioExpander.c
+}
+
+provides:
+{
+    api:
+    {
+        mangoh_gpioExpander = ${MANGOH_ROOT}/GpioExpander/mangoh_gpioExpander.api
+    }
+}
