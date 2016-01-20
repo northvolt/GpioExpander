@@ -15,10 +15,7 @@ processes:
     }
 }
 
-provides:
+extern:
 {
-    api:
-    {
-        gpioExpanderService.gpio.mangoh_gpioExpander
-    }
+    gpioExpanderService.gpio.mangoh_gpioExpander
 }
