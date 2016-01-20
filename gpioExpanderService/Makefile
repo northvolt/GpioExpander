@@ -9,7 +9,7 @@ ar86: app.ar86
 wp85: app.wp85
 
 app.%:
-	mkapp gpioExpanderService.adef -i ${MANGOH_ROOT}/GpioExpander/ -t $* -v
+	mkapp gpioExpanderService.adef -i ${MANGOH_ROOT}/apps/GpioExpander/ -t $* -v
 
 clean:
 	rm -rf _build_* *.localhost *.ar7 *.wp7 *.ar8 *.wp85

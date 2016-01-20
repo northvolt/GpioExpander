@@ -3,7 +3,7 @@ requires:
 {
     api:
     {
-        mangoh_gpioExpander = ${MANGOH_ROOT}/GpioExpander/mangoh_gpioExpander.api
+        mangoh_gpioExpander = ${MANGOH_ROOT}/apps/GpioExpander/mangoh_gpioExpander.api
     }
 }
 
