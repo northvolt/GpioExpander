@@ -1,3 +1,5 @@
+start: manual
+
 executables:
 {
     gpioExpanderDemo = ( gpioPinComponent )

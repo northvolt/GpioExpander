@@ -35,80 +35,74 @@
 //--------------------------------------------------------------------------------------------------
 REFERENCE Gpio;
 
+// TODO: It's not a good idea to have the GPIO identity be encoded in the GPIO expander app because
+//       it prevents it from being reusable.
+
 //--------------------------------------------------------------------------------------------------
 /**
  * The pin IO definition of GPIO Expander1: IC U903.
  */
 //--------------------------------------------------------------------------------------------------
-ENUM Exp1Pin
-{
-    EXP1_PIN_ARDUINO_RESET_LEVEL,     ///< GPIO Expander1 IO_0 : Arduino
-    EXP1_PIN_BATTCHRGR_PG_N,          ///< GPIO Expander1 IO_1 : Battery Charger
-    EXP1_PIN_BATTGAUGE_GPIO,          ///< GPIO Expander1 IO_2 : Battery Charger
-    EXP1_PIN_LED_ON,                  ///< GPIO Expander1 IO_3 : LED
-    EXP1_PIN_ATMEGA_RESET_GPIO,       ///< GPIO Expander1 IO_4 : Arduino
-    EXP1_PIN_CONNECT_TO_AV_LED,       ///< GPIO Expander1 IO_5 : AV connectivity
-    EXP1_PIN_PCM_ANALOG_SELECT,       ///< GPIO Expander1 IO_6 : Audio
-    EXP1_PIN_CONNECT_TO_AV,           ///< GPIO Expander1 IO_7 : AV connectivity
-    EXP1_PIN_BOARD_REV_RES1,          ///< GPIO Expander1 IO_8 : Board boot up
-    EXP1_PIN_BOARD_REV_RES2,          ///< GPIO Expander1 IO_9 : Board boot up
-    EXP1_PIN_UART_EXP1_ENN,           ///< GPIO Expander1 IO_10: IOT0,1
-    EXP1_PIN_UART_EXP1_IN,            ///< GPIO Expander1 IO_11: IOT0,1
-    EXP1_PIN_UART_EXP2_IN,            ///< GPIO Expander1 IO_12: IOT2, console
-    EXP1_PIN_SDIO_SEL,                ///< GPIO Expander1 IO_13: SD card/IOT0
-    EXP1_PIN_SPI_EXP1_ENN,            ///< GPIO Expander1 IO_14: IOT0,1
-    EXP1_PIN_SPI_EXP1_IN              ///< GPIO Expander1 IO_15: IOT0,1
-};
+DEFINE PIN_ARDUINO_RESET_LEVEL =  0; // I/O  0: ARDUINO
+DEFINE PIN_BATTCHRGR_PG_N      =  1; // I/O  1: BATTERY CHARGER
+DEFINE PIN_BATTGAUGE_GPIO      =  2; // I/O  2: BATTERY CHARGER
+DEFINE PIN_LED_ON              =  3; // I/O  3: LED
+DEFINE PIN_ATMEGA_RESET_GPIO   =  4; // I/O  4: ARDUINO
+DEFINE PIN_CONNECT_TO_AV_LED   =  5; // I/O  5: AV CONNECTIVITY
+DEFINE PIN_PCM_ANALOG_SELECT   =  6; // I/O  6: AUDIO
+DEFINE PIN_CONNECT_TO_AV       =  7; // I/O  7: AV CONNECTIVITY
+DEFINE PIN_BOARD_REV_RES1      =  8; // I/O  8: BOARD BOOT UP
+DEFINE PIN_BOARD_REV_RES2      =  9; // I/O  9: BOARD BOOT UP
+DEFINE PIN_UART_EXP1_ENN       = 10; // I/O 10: IOT0,1
+DEFINE PIN_UART_EXP1_IN        = 11; // I/O 11: IOT0,1
+DEFINE PIN_UART_EXP2_IN        = 12; // I/O 12: IOT2, CONSOLE
+DEFINE PIN_SDIO_SEL            = 13; // I/O 13: SD CARD/IOT0
+DEFINE PIN_SPI_EXP1_ENN        = 14; // I/O 14: IOT0,1
+DEFINE PIN_SPI_EXP1_IN         = 15; // I/O 15: IOT0,1
 
 //--------------------------------------------------------------------------------------------------
 /**
  * The pin IO definition of GPIO Expander2: IC U906.
  */
 //--------------------------------------------------------------------------------------------------
-ENUM Exp2Pin
-{
-    EXP2_PIN_IOT0_GPIO3,              ///< GPIO Expander2 IO_0 : IOT0 GPIO3
-    EXP2_PIN_IOT0_GPIO2,              ///< GPIO Expander2 IO_1 : IOT0 GPIO2
-    EXP2_PIN_IOT0_GPIO1,              ///< GPIO Expander2 IO_2 : IOT0 GPIO1
-    EXP2_PIN_IOT1_GPIO3,              ///< GPIO Expander2 IO_3 : IOT1 GPIO3
-    EXP2_PIN_IOT1_GPIO2,              ///< GPIO Expander2 IO_4 : IOT1 GPIO2
-    EXP2_PIN_IOT1_GPIO1,              ///< GPIO Expander2 IO_5 : IOT1 GPIO1
-    EXP2_PIN_IOT2_GPIO3,              ///< GPIO Expander2 IO_6 : IOT2 GPIO3
-    EXP2_PIN_IOT2_GPIO2,              ///< GPIO Expander2 IO_7 : IOT2 GPIO2
-    EXP2_PIN_IOT2_GPIO1,              ///< GPIO Expander2 IO_8 : IOT2 GPIO1
-    EXP2_PIN_SENSOR_INT1,             ///< GPIO Expander2 IO_9 : Accelerometer/gyro
-    EXP2_PIN_SENSOR_INT2,             ///< GPIO Expander2 IO_10: Accelerometer/gyro
-    EXP2_PIN_CARD_DETECT_IOT0,        ///< GPIO Expander2 IO_11: IOT0
-    EXP2_PIN_CARD_DETECT_IOT2,        ///< GPIO Expander2 IO_12: IOT2
-    EXP2_PIN_CARD_DETECT_IOT1,        ///< GPIO Expander2 IO_13: IOT1
-    EXP2_PIN_SPI_EXP1_ENN,            ///< GPIO Expander2 IO_14: Expander
-    EXP2_PIN_SPI_EXP1_IN              ///< GPIO Expander2 IO_15: Battery Charger
-};
+DEFINE PIN_GPIOEXP_INT1          = 16; // I/O  0: TODO: Is this label correct?
+DEFINE PIN_BATTERY_DETECT        = 17; // I/O  1:
+DEFINE PIN_GPIO_SCF3_RESET       = 18; // I/O  2:
+DEFINE PIN_LED_CARD_DETECT_IOT0  = 19; // I/O  3:
+DEFINE PIN_LED_CARD_DETECT_IOT1  = 20; // I/O  4:
+DEFINE PIN_LED_CARD_DETECT_IOT2  = 21; // I/O  5:
+DEFINE PIN_UIM2_PWM_SELECT       = 22; // I/O  6:
+DEFINE PIN_UIM2_M2_S_SELECT      = 23; // I/O  7:
+DEFINE PIN_TP900                 = 24; // I/O  8:
+DEFINE PIN_SENSOR_INT1           = 25; // I/O  9: Accelerometer/gyro
+DEFINE PIN_SENSOR_INT2           = 26; // I/O 10: Accelerometer/gyro
+DEFINE PIN_CARD_DETECT_IOT0      = 27; // I/O 11: IOT0
+DEFINE PIN_CARD_DETECT_IOT2      = 28; // I/O 12: IOT2
+DEFINE PIN_CARD_DETECT_IOT1      = 29; // I/O 13: IOT1
+DEFINE PIN_GPIOEXP_INT3          = 30; // I/O 14:
+DEFINE PIN_BATTCHGR_INT_N        = 31; // I/O 15:
 
 //--------------------------------------------------------------------------------------------------
 /**
  * The pin IO definition of GPIO Expander3: IC U909.
  */
 //--------------------------------------------------------------------------------------------------
-ENUM Exp3Pin
-{
-    EXP3_PIN_USB_HUB_INTN,            ///< GPIO Expander3 IO_0 : USB Hub Int
-    EXP3_PIN_HUB_CONNECT,             ///< GPIO Expander3 IO_1 : Hub Connect
-    EXP3_PIN_GPIO_IOT2_RESET,         ///< GPIO Expander3 IO_2 : IOT2
-    EXP3_PIN_GPIO_IOT1_RESET,         ///< GPIO Expander3 IO_3 : IOT1
-    EXP3_PIN_GPIO_IOT0_RESET,         ///< GPIO Expander3 IO_4 : IOT0
-    EXP3_PIN_IOT0_GPIO4,              ///< GPIO Expander3 IO_5 : IOT0 GPIO4
-    EXP3_PIN_IOT1_GPIO4,              ///< GPIO Expander3 IO_6 : IOT1 GPIO4
-    EXP3_PIN_IOT2_GPIO4,              ///< GPIO Expander3 IO_7 : IOT2 GPIO4
-    EXP3_PIN_UART_EXP2_ENN,           ///< GPIO Expander3 IO_8 : IOT2 Console
-    EXP3_PIN_PCM_EXP1_ENN,            ///< GPIO Expander3 IO_9 : Onboard codec/IOT0 codec
-    EXP3_PIN_PCM_EXP1_SEL,            ///< GPIO Expander3 IO_10: Onboard codec/IOT0 codec
-    EXP3_PIN_ARD_FTDI,                ///< GPIO Expander3 IO_11: Arduino
-    EXP3_PIN_LCD_ON_OFF,              ///< GPIO Expander3 IO_12:
-    EXP3_PIN_FAST_SIM_SWITCH,         ///< GPIO Expander3 IO_13:
-    EXP3_PIN_ARDUINO_USB_CTRL,        ///< GPIO Expander3 IO_14:
-    EXP3_PIN_RS232_ENABLE             ///< GPIO Expander3 IO_15: RS232
-};
+DEFINE PIN_USB_HUB_INTN        = 32; // I/O  0: USB Hub Int
+DEFINE PIN_HUB_CONNECT         = 33; // I/O  1: Hub Connect
+DEFINE PIN_GPIO_IOT2_RESET     = 34; // I/O  2: IOT2 reset
+DEFINE PIN_GPIO_IOT1_RESET     = 35; // I/O  3: IOT1 reset
+DEFINE PIN_GPIO_IOT0_RESET     = 36; // I/O  4: IOT0 reset
+DEFINE PIN_TP901               = 37; // I/O  5:
+DEFINE PIN_TP902               = 38; // I/O  6:
+DEFINE PIN_TP903               = 39; // I/O  7:
+DEFINE PIN_UART_EXP2_ENN       = 40; // I/O  8: IOT2 Console
+DEFINE PIN_PCM_EXP1_ENN        = 41; // I/O  9: Onboard codec/IOT0 codec
+DEFINE PIN_PCM_EXP1_SEL        = 42; // I/O 10: Onboard codec/IOT0 codec
+DEFINE PIN_ARD_FTDI            = 43; // I/O 11: Arduino
+DEFINE PIN_TP904               = 44; // I/O 12:
+DEFINE PIN_TP905               = 45; // I/O 13:
+DEFINE PIN_TP906               = 46; // I/O 14:
+DEFINE PIN_RS232_ENABLE        = 47; // I/O 15: RS232
 
 //--------------------------------------------------------------------------------------------------
 /**
@@ -127,13 +121,24 @@ ENUM PinMode
 
 //--------------------------------------------------------------------------------------------------
 /**
- * The type of GPIO level low or high.
+ * GPIO level - may be high or low
  */
 //--------------------------------------------------------------------------------------------------
-ENUM ActiveType
+ENUM Level
 {
-    ACTIVE_TYPE_LOW,     ///< GPIO Active-Low
-    ACTIVE_TYPE_HIGH     ///< GPIO Active-High, output signal is 1
+    LEVEL_LOW,     ///< GPIO level low
+    LEVEL_HIGH     ///< GPIO level high
+};
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Polarity inversion options for GPIO.
+ */
+//--------------------------------------------------------------------------------------------------
+ENUM Polarity
+{
+    POLARITY_NORMAL,     ///< GPIO polarity normal
+    POLARITY_INVERTED    ///< GPIO polarity inverted
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -154,10 +159,10 @@ ENUM PullUpDownType
 
 //--------------------------------------------------------------------------------------------------
 /**
- * The mode of GPIO Edge Sensivity.
+ * The mode of GPIO Edge Sensitivity.
  */
 //--------------------------------------------------------------------------------------------------
-ENUM EdgeSensivityMode
+ENUM EdgeSensitivityMode
 {
     EDGE_SENSE_NONE,      ///< None
     EDGE_SENSE_RISING,    ///< Rising
@@ -178,33 +183,6 @@ ENUM OpenDrainOperation
 
 //--------------------------------------------------------------------------------------------------
 /**
- * Request GPIO object from GPIO function module and GPIO pin number.
- *
- * @return This will return a newly created gpio reference.
- * - NULL: Function failed to get gpio reference or anything wrong
- */
-//--------------------------------------------------------------------------------------------------
-FUNCTION Gpio Request
-(
-    uint8 module             IN,  ///< For GPIO Expander, the module must be 1, 2, or 3.
-    uint8 pinNum             IN   ///< GPIO pin number of use.
-);
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Release this GPIO object resource.
- *
- * @return LE_FAULT       Function failed to release object.
- * @return LE_OK          Function succeeded.
- */
-//--------------------------------------------------------------------------------------------------
-FUNCTION le_result_t Release
-(
-    Gpio gpioRef             IN   ///< GPIO module object reference.
-);
-
-//--------------------------------------------------------------------------------------------------
-/**
  * Setup GPIO Direction INPUT or OUTPUT mode.
  *
  * @return LE_FAULT       Function failed to setup direction mode.
@@ -213,8 +191,8 @@ FUNCTION le_result_t Release
 //--------------------------------------------------------------------------------------------------
 FUNCTION le_result_t SetDirectionMode
 (
-    Gpio gpioRef             IN,  ///< GPIO module object reference.
-    PinMode mode             IN   ///< The type of GPIO pin mode,  Input, Output.
+    int gpioExpanderPinDefine IN, ///< GPIO to set direction on
+    PinMode mode              IN  ///< GPIO direction input/output mode
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -227,8 +205,8 @@ FUNCTION le_result_t SetDirectionMode
 //--------------------------------------------------------------------------------------------------
 FUNCTION le_result_t SetPullUpDown
 (
-    Gpio gpioRef             IN,  ///< GPIO module object reference
-    PullUpDownType pud       IN   ///< The type of pullup, pulldown, off
+    int gpioExpanderPinDefine IN, ///< GPIO to set pull direction on
+    PullUpDownType pud        IN  ///< The type of pullup, pulldown, off
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -248,8 +226,8 @@ FUNCTION le_result_t SetPullUpDown
 //--------------------------------------------------------------------------------------------------
 FUNCTION le_result_t SetOpenDrain
 (
-    Gpio gpioRef             IN,  ///< GPIO module object reference
-    OpenDrainOperation drain IN   ///< The operation of GPIO open drain
+    int gpioExpanderPinDefine IN, ///< GPIO to control open drain setting on
+    OpenDrainOperation drain  IN  ///< The operation of GPIO open drain
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -262,22 +240,8 @@ FUNCTION le_result_t SetOpenDrain
 //--------------------------------------------------------------------------------------------------
 FUNCTION le_result_t SetPolarity
 (
-    Gpio gpioRef             IN,  ///< GPIO module object reference
-    ActiveType polarity      IN   ///< Active-high or active-low
-);
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Rising or Falling of Edge sensitivity.
- *
- * @return LE_FAULT       Function failed to setup edge sense.
- * @return LE_OK          Function succeeded.
- */
-//--------------------------------------------------------------------------------------------------
-FUNCTION le_result_t SetEdgeSense
-(
-    Gpio gpioRef            IN,  ///< GPIO module object reference
-    EdgeSensivityMode edge  IN   ///< The mode of GPIO Edge Sensivity.
+    int gpioExpanderPinDefine IN,  ///< GPIO to set polarity on
+    Polarity polarity         IN   ///< Normal or inverted
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -290,19 +254,35 @@ FUNCTION le_result_t SetEdgeSense
 //--------------------------------------------------------------------------------------------------
 FUNCTION le_result_t Output
 (
-    Gpio gpioRef           IN,  ///< GPIO module object reference
-    ActiveType value       IN   ///< Active-high or active-low
+    int gpioExpanderPinDefine IN, ///< GPIO to set output value for
+    Level level               IN  ///< Output low or high
 );
 
 //--------------------------------------------------------------------------------------------------
 /**
- * Read value from GPIO input mode.
+ * Read value from GPIO input.
  *
- * @return This will return whether the pin is HIGH or LOW.
+ * @return
+ *      - A mangoh_gpioExpander_Level_t value
+ *      - LE_FAULT
  */
 //--------------------------------------------------------------------------------------------------
-FUNCTION ActiveType Input
+FUNCTION int Input
 (
-    Gpio gpioRef           IN  ///< GPIO module object reference
+    int gpioExpanderPinDefine IN  ///< GPIO to get input value for
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Rising or Falling of Edge sensitivity.
+ *
+ * @return LE_FAULT       Function failed to setup edge sense.
+ * @return LE_OK          Function succeeded.
+ */
+//--------------------------------------------------------------------------------------------------
+FUNCTION le_result_t SetEdgeSense
+(
+    int gpioExpanderPinDefine IN, ///< GPIO to set edge sensitivity for
+    EdgeSensitivityMode edge  IN  ///< The mode of GPIO Edge Sensitivity
 );
 

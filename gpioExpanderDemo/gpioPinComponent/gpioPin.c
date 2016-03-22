@@ -15,114 +15,134 @@
 #include "legato.h"
 #include "interfaces.h"
 
-// -------------------------------------------------------------------------------------------------
-/**
- *  Control GPIO Expander IOT LED on/off with seconds interval.
- *
- *  User can modify the interval value as like.
- */
-// -------------------------------------------------------------------------------------------------
-#define LED_ONOFF_TIME_INTERVAL    5
 
-// -------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 /**
- *  Control GPIO Expander IOT LED1, LED2, LED3, LED4 one by one with seconds interval.
- *
- *  User can modify the interval value  as like.
+ * Configure a  GPIO as an input with no pullup/pulldown or an output which is initially low
  */
-// -------------------------------------------------------------------------------------------------
-#define LED_TIME_INTERVAL    2
-
-// -------------------------------------------------------------------------------------------------
-/**
- *  Function to control GPIO Expander #1, #2, #3 by using major GPIO api.
- *
- */
-// -------------------------------------------------------------------------------------------------
-static void GpioPinCtl
+//--------------------------------------------------------------------------------------------------
+static void ConfigureGpio
 (
-    uint8_t module,                               ///< [IN] The GPIO Expander number, 1, 2, or 3.
-    uint32_t gpioNum,                             ///< [IN] The GPIO number.
-    mangoh_gpioExpander_PinMode_t direction,      ///< [IN] Direction mode, OUTPUT or INPUT.
-    mangoh_gpioExpander_ActiveType_t level        ///< [IN] Active HIGH or Active LOW.
+    int gpioDefine,                          ///< GPIO to configure.  Should be one of the
+                                             ///< definitions from mangoh_gpioExpander.api
+    mangoh_gpioExpander_PinMode_t direction  ///< Configure as input or output
+
 )
 {
-    mangoh_gpioExpander_GpioRef_t gpioRef;
-    int val;
-
-    gpioRef = mangoh_gpioExpander_Request(module, gpioNum);
-    if (gpioRef == NULL)
+    if (direction == MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT)
     {
-        LE_ERROR("Gpio Expander request module:%d gpio:%dfailed\n", module, gpioNum);
-        return;
+        // Set the output to low before we configure it as output
+        LE_FATAL_IF(
+            mangoh_gpioExpander_Output(gpioDefine, MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
+            "Couldn't set output on GPIO with ID=%d",
+            gpioDefine);
     }
-    mangoh_gpioExpander_SetDirectionMode(gpioRef, direction);
-    mangoh_gpioExpander_SetPolarity(gpioRef, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_HIGH);
-    mangoh_gpioExpander_Output(gpioRef, level);
-
-    // e.g. Input
-    val = mangoh_gpioExpander_Input(gpioRef);
-    LE_INFO("Input val = %d\n", val);
-
-    //e.g. pullup, pulldown off
-    mangoh_gpioExpander_SetPullUpDown(gpioRef, MANGOH_GPIOEXPANDER_PULLUPDOWN_TYPE_OFF);
-
-    //e.g. Release object
-    mangoh_gpioExpander_Release(gpioRef);
+    else
+    { // input
+        // An external pullup is on the board so there is no need to use the pullup of the expander
+        LE_FATAL_IF(
+            mangoh_gpioExpander_SetPullUpDown(
+                gpioDefine, MANGOH_GPIOEXPANDER_PULLUPDOWN_TYPE_OFF) != LE_OK,
+            "Couldn't set pullup/pulldown on GPIO with ID=%d",
+            gpioDefine);
+    }
+    LE_FATAL_IF(
+        mangoh_gpioExpander_SetPolarity(gpioDefine, MANGOH_GPIOEXPANDER_POLARITY_NORMAL) != LE_OK,
+        "Couldn't set normal polarity on GPIO with ID=%d",
+        gpioDefine);
+    LE_FATAL_IF(
+        mangoh_gpioExpander_SetDirectionMode(gpioDefine, direction) != LE_OK,
+        "Couldn't set direction on GPIO with ID=%d",
+        gpioDefine);
 }
 
-// -------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 /**
- *  Turn on LED1, LED2, LED3, LED4 IOT card in IOT2 slot.
+ * Checks the level of the card detect GPIO for IoT slots 0, 1, 2
+ *
+ * @return
+ *      A bit mask where bitX is for IoT slotX.  A 1 means an IoT card is present.
  */
-// -------------------------------------------------------------------------------------------------
-static void GpioPinIot2CardLedOn()
+//--------------------------------------------------------------------------------------------------
+static uint8_t PollCardDetectInputs
+(
+    void
+)
 {
-    // LED1 On
-    GpioPinCtl(2, 7, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_HIGH);
-    sleep(LED_TIME_INTERVAL);
-    // LED2 On
-    GpioPinCtl(2, 6, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_HIGH);
-    sleep(LED_TIME_INTERVAL);
-    // LED3 On
-    GpioPinCtl(2, 8, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_HIGH);
-    sleep(LED_TIME_INTERVAL);
-    // LED4 On
-    GpioPinCtl(3, 7, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_HIGH);
+    uint8_t detectedMask = 0;
+    int inputReading;
+
+    inputReading = mangoh_gpioExpander_Input(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT0);
+    LE_FATAL_IF(inputReading == LE_FAULT, "Failed to read IoT slot 0 card detect input");
+    detectedMask |= (inputReading == MANGOH_GPIOEXPANDER_LEVEL_HIGH ? 1 : 0) << 0;
+
+    inputReading = mangoh_gpioExpander_Input(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT1);
+    LE_FATAL_IF(inputReading == LE_FAULT, "Failed to read IoT slot 1 card detect input");
+    detectedMask |= (inputReading == MANGOH_GPIOEXPANDER_LEVEL_HIGH ? 1 : 0) << 1;
+
+    inputReading = mangoh_gpioExpander_Input(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT2);
+    LE_FATAL_IF(inputReading == LE_FAULT, "Failed to read IoT slot 2 card detect input");
+    detectedMask |= (inputReading == MANGOH_GPIOEXPANDER_LEVEL_HIGH ? 1 : 0) << 2;
+
+    return detectedMask;
 }
 
-// -------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 /**
- *  Turn off LED1, LED2, LED3, LED4 IOT card in IOT2 slot.
+ * Turn on or off the IoT card detect LEDs
  */
-// -------------------------------------------------------------------------------------------------
-static void GpioPinIot2CardLedOff()
+//--------------------------------------------------------------------------------------------------
+static void SetCardDetectLeds
+(
+    bool enIot0, ///< Enable slot0 card detect LED
+    bool enIot1, ///< Enable slot1 card detect LED
+    bool enIot2  ///< Enable slot2 card detect LED
+)
 {
-    // LED1 Off
-    GpioPinCtl(2, 7, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_LOW);
-    sleep(LED_TIME_INTERVAL);
-    // LED2 Off
-    GpioPinCtl(2, 6, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_LOW);
-    sleep(LED_TIME_INTERVAL);
-    // LED3 Off
-    GpioPinCtl(2, 8, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_LOW);
-    sleep(LED_TIME_INTERVAL);
-    // LED4 Off
-    GpioPinCtl(3, 7, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT, MANGOH_GPIOEXPANDER_ACTIVE_TYPE_LOW);
+    LE_FATAL_IF(
+        mangoh_gpioExpander_Output(
+            MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT0,
+            enIot0 ? MANGOH_GPIOEXPANDER_LEVEL_HIGH : MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
+        "Failed to control LED_CARD_DETECT_IOT0");
+    LE_FATAL_IF(
+        mangoh_gpioExpander_Output(
+            MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT1,
+            enIot1 ? MANGOH_GPIOEXPANDER_LEVEL_HIGH : MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
+        "Failed to control LED_CARD_DETECT_IOT1");
+    LE_FATAL_IF(
+        mangoh_gpioExpander_Output(
+            MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT2,
+            enIot2 ? MANGOH_GPIOEXPANDER_LEVEL_HIGH : MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
+        "Failed to control LED_CARD_DETECT_IOT2");
 }
 
 COMPONENT_INIT
 {
-    LE_INFO("This is sample Legato GPIO Expander app by using mangoh_gpioExpander.api on mangOH project\n");
+    LE_INFO(
+        "This sample app demonstrates GPIO expander functionality by turning on and off the IoT "
+        "slot LEDs as a module is inserted or removed\n");
 
-    while(1) {
-        LE_INFO("GPIO Expander#2 IOT2 GPIO All LEDs Off\n");
-        GpioPinIot2CardLedOff();
-        sleep(LED_ONOFF_TIME_INTERVAL);
+    // Configure card detect pins as inputs
+    ConfigureGpio(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT0, MANGOH_GPIOEXPANDER_PIN_MODE_INPUT);
+    ConfigureGpio(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT1, MANGOH_GPIOEXPANDER_PIN_MODE_INPUT);
+    ConfigureGpio(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT2, MANGOH_GPIOEXPANDER_PIN_MODE_INPUT);
 
-        LE_INFO("GPIO Expander#2 IOT2 GPIO All LEDs ON\n");
-        GpioPinIot2CardLedOn();
-        sleep(LED_ONOFF_TIME_INTERVAL);
+    // Configure card detect LED pins as outputs
+    ConfigureGpio(
+        MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT0, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT);
+    ConfigureGpio(
+        MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT1, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT);
+    ConfigureGpio(
+        MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT2, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT);
+
+    while (true)
+    {
+        const uint8_t slotsConnectedMask = PollCardDetectInputs();
+        LE_INFO("IoT slotsConnectedMask is currently 0x%x", slotsConnectedMask);
+        SetCardDetectLeds(
+            ((slotsConnectedMask >> 0) & 0x1) == 1,
+            ((slotsConnectedMask >> 1) & 0x1) == 1,
+            ((slotsConnectedMask >> 2) & 0x1) == 1);
+        sleep(1); // Wait 1 second before polling again
     }
-    return;
 }
