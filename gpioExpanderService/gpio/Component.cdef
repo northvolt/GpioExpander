@@ -1,12 +1,73 @@
 sources:
 {
     gpioExpander.c
+    gpioExpanderUtils.c
+}
+
+cflags:
+{
+    "-std=c99"
+}
+
+requires:
+{
+    api:
+    {
+        expander2Interrupt = ${LEGATO_ROOT}/interfaces/le_gpio.api
+    }
 }
 
 provides:
 {
     api:
     {
-        mangoh_gpioExpander = ${MANGOH_ROOT}/apps/GpioExpander/mangoh_gpioExpander.api
+        mangoh_gpioExp1Pin0  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin1  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin2  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin3  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin4  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin5  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin6  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin7  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin8  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin9  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin10 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin11 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin12 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin13 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin14 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp1Pin15 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin0  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin1  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin2  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin3  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin4  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin5  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin6  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin7  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin8  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin9  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin10 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin11 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin12 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin13 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin14 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp2Pin15 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin0  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin1  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin2  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin3  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin4  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin5  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin6  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin7  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin8  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin9  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin10 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin11 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin12 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin13 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin14 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExp3Pin15 = ${LEGATO_ROOT}/interfaces/le_gpio.api
     }
 }

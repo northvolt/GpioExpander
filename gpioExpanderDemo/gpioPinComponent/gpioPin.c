@@ -1,10 +1,9 @@
 /**
- * @file gpioPin.c
+ * @file
  *
- * This is sample Legato GPIO app by using mangoh_gpioExpander.api on mangOH project.
- *
- * It includes functions to enable/disable IOT card LED1, LED2, LED3, and LED4.
- * Those IOT LEDs will be on or off one by one
+ * This is sample application which controls the IoT card detect LEDs based upon whether an IoT
+ * card is present in the slot.  The applications demonstrates use of the le_gpio.api as
+ * implemented by the GPIO expander.
  *
  * <HR>
  *
@@ -16,105 +15,122 @@
 #include "interfaces.h"
 
 
-//--------------------------------------------------------------------------------------------------
-/**
- * Configure a  GPIO as an input with no pullup/pulldown or an output which is initially low
- */
-//--------------------------------------------------------------------------------------------------
-static void ConfigureGpio
+static void ConfigureGpios
 (
-    int gpioDefine,                          ///< GPIO to configure.  Should be one of the
-                                             ///< definitions from mangoh_gpioExpander.api
-    mangoh_gpioExpander_PinMode_t direction  ///< Configure as input or output
+    void
+);
+static void CardDetectEventHandler
+(
+    bool gpioState,
+    void* contextPtr
+);
 
-)
-{
-    if (direction == MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT)
-    {
-        // Set the output to low before we configure it as output
-        LE_FATAL_IF(
-            mangoh_gpioExpander_Output(gpioDefine, MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
-            "Couldn't set output on GPIO with ID=%d",
-            gpioDefine);
-    }
-    else
-    { // input
-        // An external pullup is on the board so there is no need to use the pullup of the expander
-        LE_FATAL_IF(
-            mangoh_gpioExpander_SetPullUpDown(
-                gpioDefine, MANGOH_GPIOEXPANDER_PULLUPDOWN_TYPE_OFF) != LE_OK,
-            "Couldn't set pullup/pulldown on GPIO with ID=%d",
-            gpioDefine);
-    }
-    LE_FATAL_IF(
-        mangoh_gpioExpander_SetPolarity(gpioDefine, MANGOH_GPIOEXPANDER_POLARITY_NORMAL) != LE_OK,
-        "Couldn't set normal polarity on GPIO with ID=%d",
-        gpioDefine);
-    LE_FATAL_IF(
-        mangoh_gpioExpander_SetDirectionMode(gpioDefine, direction) != LE_OK,
-        "Couldn't set direction on GPIO with ID=%d",
-        gpioDefine);
-}
 
 //--------------------------------------------------------------------------------------------------
 /**
- * Checks the level of the card detect GPIO for IoT slots 0, 1, 2
- *
- * @return
- *      A bit mask where bitX is for IoT slotX.  A 1 means an IoT card is present.
+ * Performs initial configuration of the GPIOs
  */
 //--------------------------------------------------------------------------------------------------
-static uint8_t PollCardDetectInputs
+static void ConfigureGpios
 (
     void
 )
 {
-    uint8_t detectedMask = 0;
-    int inputReading;
+    // Disable resistors on card detect GPIOs
+    LE_FATAL_IF(
+        mangoh_cardDetect0Gpio_DisableResistors() != LE_OK,
+        "Couldn't disable resistors on card detect 0 input");
+    LE_FATAL_IF(
+        mangoh_cardDetect1Gpio_DisableResistors() != LE_OK,
+        "Couldn't disable resistors on card detect 1 input");
+    LE_FATAL_IF(
+        mangoh_cardDetect2Gpio_DisableResistors() != LE_OK,
+        "Couldn't disable resistors on card detect 2 input");
 
-    inputReading = mangoh_gpioExpander_Input(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT0);
-    LE_FATAL_IF(inputReading == LE_FAULT, "Failed to read IoT slot 0 card detect input");
-    detectedMask |= (inputReading == MANGOH_GPIOEXPANDER_LEVEL_HIGH ? 1 : 0) << 0;
+    // Configure card detect GPIOs as active low inputs since the card detect signal is inverted
+    // low when a card is present
+    LE_FATAL_IF(
+        mangoh_cardDetect0Gpio_SetInput(MANGOH_CARDDETECT0GPIO_ACTIVE_LOW) != LE_OK,
+        "Couldn't configure card detect 0 as an input");
+    LE_FATAL_IF(
+        mangoh_cardDetect1Gpio_SetInput(MANGOH_CARDDETECT1GPIO_ACTIVE_LOW) != LE_OK,
+        "Couldn't configure card detect 1 as an input");
+    LE_FATAL_IF(
+        mangoh_cardDetect2Gpio_SetInput(MANGOH_CARDDETECT2GPIO_ACTIVE_LOW) != LE_OK,
+        "Couldn't configure card detect 2 as an input");
 
-    inputReading = mangoh_gpioExpander_Input(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT1);
-    LE_FATAL_IF(inputReading == LE_FAULT, "Failed to read IoT slot 1 card detect input");
-    detectedMask |= (inputReading == MANGOH_GPIOEXPANDER_LEVEL_HIGH ? 1 : 0) << 1;
+    // Add event handlers for when the card detect inputs change
+    mangoh_cardDetect0Gpio_AddChangeEventHandler(
+        MANGOH_CARDDETECT0GPIO_EDGE_BOTH, &CardDetectEventHandler, (void *)0, 0);
+    mangoh_cardDetect1Gpio_AddChangeEventHandler(
+        MANGOH_CARDDETECT1GPIO_EDGE_BOTH, &CardDetectEventHandler, (void *)1, 0);
+    mangoh_cardDetect2Gpio_AddChangeEventHandler(
+        MANGOH_CARDDETECT2GPIO_EDGE_BOTH, &CardDetectEventHandler, (void *)2, 0);
 
-    inputReading = mangoh_gpioExpander_Input(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT2);
-    LE_FATAL_IF(inputReading == LE_FAULT, "Failed to read IoT slot 2 card detect input");
-    detectedMask |= (inputReading == MANGOH_GPIOEXPANDER_LEVEL_HIGH ? 1 : 0) << 2;
-
-    return detectedMask;
+    // Configure the card detect LED GPIOs as outputs and set their initial value based on whether
+    // a card is present
+    LE_FATAL_IF(
+        mangoh_ledCardDetect0Gpio_SetPushPullOutput(
+            MANGOH_LEDCARDDETECT0GPIO_ACTIVE_HIGH, mangoh_cardDetect0Gpio_Read()) != LE_OK,
+        "Couldn't configure card detect LED 0 as a push pull output");
+    LE_FATAL_IF(
+        mangoh_ledCardDetect1Gpio_SetPushPullOutput(
+            MANGOH_LEDCARDDETECT0GPIO_ACTIVE_HIGH, mangoh_cardDetect1Gpio_Read()) != LE_OK,
+        "Couldn't configure card detect LED 1 as a push pull output");
+    LE_FATAL_IF(
+        mangoh_ledCardDetect2Gpio_SetPushPullOutput(
+            MANGOH_LEDCARDDETECT0GPIO_ACTIVE_HIGH, mangoh_cardDetect2Gpio_Read()) != LE_OK,
+        "Couldn't configure card detect LED 2 as a push pull output");
 }
 
 //--------------------------------------------------------------------------------------------------
 /**
- * Turn on or off the IoT card detect LEDs
+ * Turns on/off the card detect LED for each IoT slot as the card is inserted/removed
  */
 //--------------------------------------------------------------------------------------------------
-static void SetCardDetectLeds
+static void CardDetectEventHandler
 (
-    bool enIot0, ///< Enable slot0 card detect LED
-    bool enIot1, ///< Enable slot1 card detect LED
-    bool enIot2  ///< Enable slot2 card detect LED
+    bool gpioState,   ///< [IN] true if the GPIO is active or false if it is inactive
+    void* contextPtr  ///< [IN] A context pointer which is actually not a pointer, but rather is
+                      ///  being used to store an integer representing the GPIO expander number
+                      ///  which caused the event.
 )
 {
-    LE_FATAL_IF(
-        mangoh_gpioExpander_Output(
-            MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT0,
-            enIot0 ? MANGOH_GPIOEXPANDER_LEVEL_HIGH : MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
-        "Failed to control LED_CARD_DETECT_IOT0");
-    LE_FATAL_IF(
-        mangoh_gpioExpander_Output(
-            MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT1,
-            enIot1 ? MANGOH_GPIOEXPANDER_LEVEL_HIGH : MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
-        "Failed to control LED_CARD_DETECT_IOT1");
-    LE_FATAL_IF(
-        mangoh_gpioExpander_Output(
-            MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT2,
-            enIot2 ? MANGOH_GPIOEXPANDER_LEVEL_HIGH : MANGOH_GPIOEXPANDER_LEVEL_LOW) != LE_OK,
-        "Failed to control LED_CARD_DETECT_IOT2");
+    // We treat contextPtr as an int which tells us which card detect pin the interrupt is for
+    const int iotSlotOfEvent = (int)contextPtr;
+    LE_INFO("Card detect event handler called for slot %d", iotSlotOfEvent);
+    switch (iotSlotOfEvent)
+    {
+        case 0:
+            LE_FATAL_IF(
+                (gpioState ?
+                    mangoh_ledCardDetect0Gpio_Activate() :
+                    mangoh_ledCardDetect0Gpio_Deactivate()) != LE_OK,
+                "Couldn't change output on card detect 0 LED");
+            break;
+
+        case 1:
+            LE_FATAL_IF(
+                (gpioState ?
+                    mangoh_ledCardDetect1Gpio_Activate() :
+                    mangoh_ledCardDetect1Gpio_Deactivate()) != LE_OK,
+                "Couldn't change output on card detect 1 LED");
+            break;
+
+        case 2:
+            LE_FATAL_IF(
+                (gpioState ?
+                    mangoh_ledCardDetect2Gpio_Activate() :
+                    mangoh_ledCardDetect2Gpio_Deactivate()) != LE_OK,
+                "Couldn't change output on card detect 2 LED");
+            break;
+
+        default:
+            LE_FATAL("Handling an event for an unknown card detect input");
+            break;
+    }
 }
+
 
 COMPONENT_INIT
 {
@@ -122,27 +138,5 @@ COMPONENT_INIT
         "This sample app demonstrates GPIO expander functionality by turning on and off the IoT "
         "slot LEDs as a module is inserted or removed\n");
 
-    // Configure card detect pins as inputs
-    ConfigureGpio(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT0, MANGOH_GPIOEXPANDER_PIN_MODE_INPUT);
-    ConfigureGpio(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT1, MANGOH_GPIOEXPANDER_PIN_MODE_INPUT);
-    ConfigureGpio(MANGOH_GPIOEXPANDER_PIN_CARD_DETECT_IOT2, MANGOH_GPIOEXPANDER_PIN_MODE_INPUT);
-
-    // Configure card detect LED pins as outputs
-    ConfigureGpio(
-        MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT0, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT);
-    ConfigureGpio(
-        MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT1, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT);
-    ConfigureGpio(
-        MANGOH_GPIOEXPANDER_PIN_LED_CARD_DETECT_IOT2, MANGOH_GPIOEXPANDER_PIN_MODE_OUTPUT);
-
-    while (true)
-    {
-        const uint8_t slotsConnectedMask = PollCardDetectInputs();
-        LE_INFO("IoT slotsConnectedMask is currently 0x%x", slotsConnectedMask);
-        SetCardDetectLeds(
-            ((slotsConnectedMask >> 0) & 0x1) == 1,
-            ((slotsConnectedMask >> 1) & 0x1) == 1,
-            ((slotsConnectedMask >> 2) & 0x1) == 1);
-        sleep(1); // Wait 1 second before polling again
-    }
+    ConfigureGpios();
 }
