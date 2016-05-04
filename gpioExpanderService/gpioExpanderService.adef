@@ -13,6 +13,8 @@ processes:
     {
         ( gpioExpanderService )
     }
+
+    faultAction: restart
 }
 
 bindings:
