@@ -12,8 +12,13 @@
 #include "legato.h"
 #include "interfaces.h"
 #include "gpioExpander.h"
-// Only required for control of i2c switch, which shouldn't be in this file to begin with
+// Only required for control of i2c switch, which shouldn't be in this file to begin with.
+// On yocto the file has a different non-standard name.
+#ifdef LEGATO_EMBEDDED
 #include <linux/i2c-dev-user.h>
+#else
+#include <linux/i2c-dev.h>
+#endif
 
 //--------------------------------------------------------------------------------------------------
 /**
