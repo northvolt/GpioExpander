@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+#---------------------------------------------------------------------------------------------------
+# @file
+#
+# <HR>
+#
+# Copyright (C) Sierra Wireless Inc. Use of this work is subject to license.
+#---------------------------------------------------------------------------------------------------
+
 import jinja2
 
 code_block_template = """
