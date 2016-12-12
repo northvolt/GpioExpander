@@ -9116,6 +9116,14 @@ static int I2cAccessBusAddr
     return fd;
 }
 
+#define I2C_SW_PORT_IOT0         0
+#define I2C_SW_PORT_IOT1         1
+#define I2C_SW_PORT_IOT2         2
+#define I2C_SW_PORT_USB_HUB      3
+#define I2C_SW_PORT_GPIO_EXP1    4
+#define I2C_SW_PORT_GPIO_EXP2    5
+#define I2C_SW_PORT_GPIO_EXP3    6
+#define I2C_SW_PORT_BATT_CHARGER 7
 
 //--------------------------------------------------------------------------------------------------
 /**
@@ -9135,8 +9143,16 @@ COMPONENT_INIT
     const int i2cdev_fd = I2cAccessBusAddr(i2cBus, I2C_SWITCH_PCA9548A_ADDR);
     LE_FATAL_IF(i2cdev_fd == LE_FAULT, "failed to open i2cbus %d\n", i2cBus);
 
-    const uint8_t enableAllPorts = 0xff;
-    LE_FATAL_IF(i2c_smbus_write_byte(i2cdev_fd, enableAllPorts) == -1, "failed to write i2c data");
+    // Do not enable battery charger or USB hub ports.  It seems that enabling too many ports
+    // simultaneously can lead to i2c communication failures.
+    const uint8_t enablePorts = (
+        (1 << I2C_SW_PORT_IOT0) |
+        (1 << I2C_SW_PORT_IOT1) |
+        (1 << I2C_SW_PORT_IOT2) |
+        (1 << I2C_SW_PORT_GPIO_EXP1) |
+        (1 << I2C_SW_PORT_GPIO_EXP2) |
+        (1 << I2C_SW_PORT_GPIO_EXP3));
+    LE_FATAL_IF(i2c_smbus_write_byte(i2cdev_fd, enablePorts) == -1, "failed to write i2c data");
 
     close(i2cdev_fd);
 
