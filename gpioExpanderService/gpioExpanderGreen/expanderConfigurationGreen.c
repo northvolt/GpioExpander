@@ -12,13 +12,12 @@
 #include "legato.h"
 #include "interfaces.h"
 #include "gpioExpander.h"
-// Only required for control of i2c switch, which shouldn't be in this file to begin with.
-// On yocto the file has a different non-standard name.
-#ifdef LEGATO_EMBEDDED
-#include <linux/i2c-dev-user.h>
-#else
-#include <linux/i2c-dev.h>
-#endif
+#include "i2cSwitch.h"
+
+
+#define I2C_SX1509_GPIO_EXPANDER1_ADDR      0x3E
+#define I2C_SX1509_GPIO_EXPANDER2_ADDR      0x3F
+#define I2C_SX1509_GPIO_EXPANDER3_ADDR      0x70
 
 //--------------------------------------------------------------------------------------------------
 /**
@@ -29,15 +28,14 @@
 //--------------------------------------------------------------------------------------------------
 #define I2C_SWITCH_PCA9548A_ADDR            0x71
 
-//--------------------------------------------------------------------------------------------------
-/**
- * I2C slave address of the GPIO expanders on the MangOH Green board
- */
-//--------------------------------------------------------------------------------------------------
-#define I2C_SX1509_GPIO_EXPANDER1_ADDR      0x3E
-#define I2C_SX1509_GPIO_EXPANDER2_ADDR      0x3F
-#define I2C_SX1509_GPIO_EXPANDER3_ADDR      0x70
-
+#define I2C_SW_PORT_IOT0         0
+#define I2C_SW_PORT_IOT1         1
+#define I2C_SW_PORT_IOT2         2
+#define I2C_SW_PORT_USB_HUB      3
+#define I2C_SW_PORT_GPIO_EXP1    4
+#define I2C_SW_PORT_GPIO_EXP2    5
+#define I2C_SW_PORT_GPIO_EXP3    6
+#define I2C_SW_PORT_BATT_CHARGER 7
 
 //--------------------------------------------------------------------------------------------------
 /**
@@ -119,12 +117,120 @@ static gpioExpander_HandlerRecord_t *expander1InterruptHandlerRecord =
 static gpioExpander_HandlerRecord_t *expander3InterruptHandlerRecord =
     &(handlerRecords[EXPANDER_2_INDEX][14]);
 
+
 //--------------------------------------------------------------------------------------------------
-// BEGIN GENERATED CODE
-//
-// Consider regenerating this code if modifications are required.  This code generation is done at
-// design time and checked in.
+/**
+ * Interrupt handler for GPIO expander #1.
+ */
 //--------------------------------------------------------------------------------------------------
+static void gpioExpander_Expander1InterruptHandler
+(
+    bool state,       ///< Current state of the GPIO - true: active, false: inactive
+    void *contextPtr  ///< Unused
+)
+{
+    gpioExpander_GenericInterruptHandler(
+        0, I2C_SX1509_GPIO_EXPANDER1_ADDR, handlerRecords[EXPANDER_1_INDEX]);
+}
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Interrupt handler for GPIO expander #2.
+ */
+//--------------------------------------------------------------------------------------------------
+static void gpioExpander_Expander2InterruptHandler
+(
+    bool state,       ///< Current state of the GPIO - true: active, false: inactive
+    void *contextPtr  ///< Unused
+)
+{
+    gpioExpander_GenericInterruptHandler(
+        0, I2C_SX1509_GPIO_EXPANDER2_ADDR, handlerRecords[EXPANDER_2_INDEX]);
+}
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Interrupt handler for GPIO expander #3.
+ */
+//--------------------------------------------------------------------------------------------------
+static void gpioExpander_Expander3InterruptHandler
+(
+    bool state,       ///< Current state of the GPIO - true: active, false: inactive
+    void *contextPtr  ///< Unused
+)
+{
+    gpioExpander_GenericInterruptHandler(
+        0, I2C_SX1509_GPIO_EXPANDER3_ADDR, handlerRecords[EXPANDER_3_INDEX]);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Initialize the three GPIO expanders and configure the interrupts.  GPIO expander #2's interrupt
+ * pin is connected to a GPIO in the CF3, but GPIO expander #1 and #3 have their interrupt pins
+ * connected to a GPIO of expander #2.
+ *
+ * @todo
+ *      This is not the right place to be controlling the I2C switch.  This needs to be managed
+ *      centrally.
+ */
+//--------------------------------------------------------------------------------------------------
+COMPONENT_INIT
+{
+    // Do not enable battery charger or USB hub ports.  It seems that enabling too many ports
+    // simultaneously can lead to i2c communication failures.
+    const uint8_t enablePorts = (
+        (1 << I2C_SW_PORT_IOT0) |
+        (1 << I2C_SW_PORT_IOT1) |
+        (1 << I2C_SW_PORT_IOT2) |
+        (1 << I2C_SW_PORT_GPIO_EXP1) |
+        (1 << I2C_SW_PORT_GPIO_EXP2) |
+        (1 << I2C_SW_PORT_GPIO_EXP3));
+    const int i2cBus = 0;
+    LE_DEBUG("Enabling PCA9548A I2C switch...");
+    LE_FATAL_IF(
+        ConfigureI2cSwitch(i2cBus, I2C_SWITCH_PCA9548A_ADDR, enablePorts) != LE_OK,
+        "Failed to configure the I2C switch");
+
+    // Reset the GPIO expanders
+    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER2_ADDR);
+    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER1_ADDR);
+    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER3_ADDR);
+
+    // Configure the interrupt that run from expander 2 to the CF3
+    expander2Interrupt_EnablePullUp();
+    expander2Interrupt_SetInput(EXPANDER2INTERRUPT_ACTIVE_LOW);
+    expander2Interrupt_AddChangeEventHandler(
+        EXPANDER2INTERRUPT_EDGE_RISING,
+        &gpioExpander_Expander2InterruptHandler,
+        NULL,
+        100);
+
+    // Configure the interrupt that run from expander 1 to expander 2
+    gpioExpander_DisableResistors(expander1InterruptPinSpec);
+    gpioExpander_SetInput(expander1InterruptPinSpec, GPIO_EXPANDER_ACTIVE_LOW);
+    gpioExpander_AddChangeEventHandler(
+        expander1InterruptPinSpec,
+        expander1InterruptHandlerRecord,
+        GPIO_EXPANDER_EDGE_RISING,
+        &gpioExpander_Expander1InterruptHandler,
+        NULL,
+        1);
+
+    // Configure the interrupt that run from expander 3 to expander 2
+    gpioExpander_DisableResistors(expander3InterruptPinSpec);
+    gpioExpander_SetInput(expander3InterruptPinSpec, GPIO_EXPANDER_ACTIVE_LOW);
+    gpioExpander_AddChangeEventHandler(
+        expander3InterruptPinSpec,
+        expander3InterruptHandlerRecord,
+        GPIO_EXPANDER_EDGE_RISING,
+        &gpioExpander_Expander3InterruptHandler,
+        NULL,
+        1);
+}
+
+
+// ----- BEGIN GENERATED CODE
 
 // GPIO expander #1 GPIO 0
 le_result_t mangoh_gpioExp1Pin0_SetInput
@@ -9005,190 +9111,4 @@ void mangoh_gpioExp3Pin15_RemoveChangeEventHandler
         &handlerRecords[EXPANDER_3_INDEX][15],
         (gpioExpander_ChangeCallbackRef_t)ref);
 }
-//--------------------------------------------------------------------------------------------------
-// END GENERATED CODE
-//--------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Interrupt handler for GPIO expander #1.
- */
-//--------------------------------------------------------------------------------------------------
-static void gpioExpander_Expander1InterruptHandler
-(
-    bool state,       ///< Current state of the GPIO - true: active, false: inactive
-    void *contextPtr  ///< Unused
-)
-{
-    gpioExpander_GenericInterruptHandler(
-        0, I2C_SX1509_GPIO_EXPANDER1_ADDR, handlerRecords[EXPANDER_1_INDEX]);
-}
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Interrupt handler for GPIO expander #2.
- */
-//--------------------------------------------------------------------------------------------------
-static void gpioExpander_Expander2InterruptHandler
-(
-    bool state,       ///< Current state of the GPIO - true: active, false: inactive
-    void *contextPtr  ///< Unused
-)
-{
-    gpioExpander_GenericInterruptHandler(
-        0, I2C_SX1509_GPIO_EXPANDER2_ADDR, handlerRecords[EXPANDER_2_INDEX]);
-}
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Interrupt handler for GPIO expander #3.
- */
-//--------------------------------------------------------------------------------------------------
-static void gpioExpander_Expander3InterruptHandler
-(
-    bool state,       ///< Current state of the GPIO - true: active, false: inactive
-    void *contextPtr  ///< Unused
-)
-{
-    gpioExpander_GenericInterruptHandler(
-        0, I2C_SX1509_GPIO_EXPANDER3_ADDR, handlerRecords[EXPANDER_3_INDEX]);
-}
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Get the file handle for the given I2C bus and configure it for access to the given I2C address.
- *
- * @return
- *      - LE_FAULT on failure
- *      - A filehandle to the I2C bus
- *
- * @note
- *      Copied here from gpioExpanderUtils.c.  This function is only required in here because of
- *      the access to the I2C switch (which doesn't belong in here anyway).  This should be removed
- *      later.  Though perhaps this function belongs in a central I2C library since it seems like
- *      it will be required anywhere I2C is used.
- */
-//--------------------------------------------------------------------------------------------------
-static int I2cAccessBusAddr
-(
-    uint8_t i2cBus,
-    uint8_t i2cAddr
-)
-{
-    const size_t filenameSize = 32;
-    char filename[filenameSize];
-
-    snprintf(filename, filenameSize, "/dev/i2c/%d", i2cBus);
-
-    LE_DEBUG("Opening I2C bus: '%s'", filename);
-    int fd = open(filename, O_RDWR);
-    if (fd < 0 && (errno == ENOENT || errno == ENOTDIR))
-    {
-        snprintf(filename, filenameSize, "/dev/i2c-%d", i2cBus);
-        LE_DEBUG("Opening I2C bus: '%s'", filename);
-        fd = open(filename, O_RDWR);
-    }
-
-    if (fd < 0)
-    {
-        if (errno == ENOENT)
-        {
-            LE_ERROR(
-                "Could not open file /dev/i2c-%d or /dev/i2c/%d: %s\n",
-                i2cBus,
-                i2cBus,
-                strerror(ENOENT));
-        }
-        else
-        {
-            LE_ERROR("Could not open file %s': %s\n", filename, strerror(errno));
-        }
-
-        return LE_FAULT;
-    }
-
-    if (ioctl(fd, I2C_SLAVE_FORCE, i2cAddr) < 0)
-    {
-        LE_ERROR("Could not set address to 0x%02x: %s\n", i2cAddr, strerror(errno));
-        return LE_FAULT;
-    }
-
-    return fd;
-}
-
-#define I2C_SW_PORT_IOT0         0
-#define I2C_SW_PORT_IOT1         1
-#define I2C_SW_PORT_IOT2         2
-#define I2C_SW_PORT_USB_HUB      3
-#define I2C_SW_PORT_GPIO_EXP1    4
-#define I2C_SW_PORT_GPIO_EXP2    5
-#define I2C_SW_PORT_GPIO_EXP3    6
-#define I2C_SW_PORT_BATT_CHARGER 7
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Initialize the three GPIO expanders and configure the interrupts.  GPIO expander #2's interrupt
- * pin is connected to a GPIO in the CF3, but GPIO expander #1 and #3 have their interrupt pins
- * connected to a GPIO of expander #2.
- *
- * @todo
- *      This is not the right place to be controlling the I2C switch.  This needs to be managed
- *      centrally.
- */
-//--------------------------------------------------------------------------------------------------
-COMPONENT_INIT
-{
-    LE_DEBUG("Enabling PCA9548A I2C switch...");
-    const int i2cBus = 0;
-    const int i2cdev_fd = I2cAccessBusAddr(i2cBus, I2C_SWITCH_PCA9548A_ADDR);
-    LE_FATAL_IF(i2cdev_fd == LE_FAULT, "failed to open i2cbus %d\n", i2cBus);
-
-    // Do not enable battery charger or USB hub ports.  It seems that enabling too many ports
-    // simultaneously can lead to i2c communication failures.
-    const uint8_t enablePorts = (
-        (1 << I2C_SW_PORT_IOT0) |
-        (1 << I2C_SW_PORT_IOT1) |
-        (1 << I2C_SW_PORT_IOT2) |
-        (1 << I2C_SW_PORT_GPIO_EXP1) |
-        (1 << I2C_SW_PORT_GPIO_EXP2) |
-        (1 << I2C_SW_PORT_GPIO_EXP3));
-    LE_FATAL_IF(i2c_smbus_write_byte(i2cdev_fd, enablePorts) == -1, "failed to write i2c data");
-
-    close(i2cdev_fd);
-
-    // Reset the GPIO expanders
-    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER2_ADDR);
-    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER1_ADDR);
-    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER3_ADDR);
-
-    // Configure the interrupt that run from expander 2 to the CF3
-    expander2Interrupt_EnablePullUp();
-    expander2Interrupt_SetInput(EXPANDER2INTERRUPT_ACTIVE_LOW);
-    expander2Interrupt_AddChangeEventHandler(
-        EXPANDER2INTERRUPT_EDGE_RISING,
-        &gpioExpander_Expander2InterruptHandler,
-        NULL,
-        100);
-
-    // Configure the interrupt that run from expander 1 to expander 2
-    gpioExpander_DisableResistors(expander1InterruptPinSpec);
-    gpioExpander_SetInput(expander1InterruptPinSpec, GPIO_EXPANDER_ACTIVE_LOW);
-    gpioExpander_AddChangeEventHandler(
-        expander1InterruptPinSpec,
-        expander1InterruptHandlerRecord,
-        GPIO_EXPANDER_EDGE_RISING,
-        &gpioExpander_Expander1InterruptHandler,
-        NULL,
-        1);
-
-    // Configure the interrupt that run from expander 3 to expander 2
-    gpioExpander_DisableResistors(expander3InterruptPinSpec);
-    gpioExpander_SetInput(expander3InterruptPinSpec, GPIO_EXPANDER_ACTIVE_LOW);
-    gpioExpander_AddChangeEventHandler(
-        expander3InterruptPinSpec,
-        expander3InterruptHandlerRecord,
-        GPIO_EXPANDER_EDGE_RISING,
-        &gpioExpander_Expander3InterruptHandler,
-        NULL,
-        1);
-}
+// ----- END GENERATED CODE

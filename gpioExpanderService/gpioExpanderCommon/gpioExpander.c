@@ -1454,3 +1454,7 @@ static le_result_t SetDirection
     return LE_OK;
 }
 
+
+COMPONENT_INIT
+{
+}

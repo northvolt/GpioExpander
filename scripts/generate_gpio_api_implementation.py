@@ -9,15 +9,16 @@
 #---------------------------------------------------------------------------------------------------
 
 import jinja2
+import sys
 
 code_block_template = """
-// GPIO expander #{{expander}} GPIO {{gpio}}
+// GPIO expander {% if expander %}#{{expander}} {% endif %}GPIO {{gpio}}
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetInput
 (
     mangoh_gpioExp{{expander}}Pin{{gpio}}_Polarity_t polarity
 )
 {
-    return gpioExpander_SetInput(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}], polarity);
+    return gpioExpander_SetInput(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}], polarity);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetPushPullOutput
@@ -27,7 +28,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetPushPullOutput
 )
 {
     return gpioExpander_SetPushPullOutput(
-        &expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}], polarity, value);
+        &expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}], polarity, value);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetTriStateOutput
@@ -35,7 +36,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetTriStateOutput
     mangoh_gpioExp{{expander}}Pin{{gpio}}_Polarity_t polarity
 )
 {
-    return gpioExpander_SetTriStateOutput(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}], polarity);
+    return gpioExpander_SetTriStateOutput(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}], polarity);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetOpenDrainOutput
@@ -45,7 +46,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetOpenDrainOutput
 )
 {
     return gpioExpander_SetOpenDrainOutput(
-        &expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}], polarity, value);
+        &expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}], polarity, value);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_EnablePullUp
@@ -53,7 +54,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_EnablePullUp
     void
 )
 {
-    return gpioExpander_EnablePullUp(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_EnablePullUp(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_EnablePullDown
@@ -61,7 +62,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_EnablePullDown
     void
 )
 {
-    return gpioExpander_EnablePullDown(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_EnablePullDown(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_DisableResistors
@@ -69,7 +70,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_DisableResistors
     void
 )
 {
-    return gpioExpander_DisableResistors(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_DisableResistors(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_Activate
@@ -77,7 +78,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_Activate
     void
 )
 {
-    return gpioExpander_Activate(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_Activate(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_Deactivate
@@ -85,7 +86,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_Deactivate
     void
 )
 {
-    return gpioExpander_Deactivate(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_Deactivate(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetHighZ
@@ -93,7 +94,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetHighZ
     void
 )
 {
-    return gpioExpander_SetHighZ(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_SetHighZ(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 bool mangoh_gpioExp{{expander}}Pin{{gpio}}_Read
@@ -101,7 +102,7 @@ bool mangoh_gpioExp{{expander}}Pin{{gpio}}_Read
     void
 )
 {
-    return gpioExpander_Read(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_Read(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetEdgeSense
@@ -109,7 +110,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_SetEdgeSense
     mangoh_gpioExp{{expander}}Pin{{gpio}}_Edge_t trigger
 )
 {
-    return gpioExpander_SetEdgeSense(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}], trigger);
+    return gpioExpander_SetEdgeSense(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}], trigger);
 }
 
 mangoh_gpioExp{{expander}}Pin{{gpio}}_Edge_t mangoh_gpioExp{{expander}}Pin{{gpio}}_GetEdgeSense
@@ -117,7 +118,7 @@ mangoh_gpioExp{{expander}}Pin{{gpio}}_Edge_t mangoh_gpioExp{{expander}}Pin{{gpio
     void
 )
 {
-    return gpioExpander_GetEdgeSense(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_GetEdgeSense(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_DisableEdgeSense
@@ -125,7 +126,7 @@ le_result_t mangoh_gpioExp{{expander}}Pin{{gpio}}_DisableEdgeSense
     void
 )
 {
-    return gpioExpander_DisableEdgeSense(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_DisableEdgeSense(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 bool mangoh_gpioExp{{expander}}Pin{{gpio}}_IsOutput
@@ -133,7 +134,7 @@ bool mangoh_gpioExp{{expander}}Pin{{gpio}}_IsOutput
     void
 )
 {
-    return gpioExpander_IsOutput(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_IsOutput(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 bool mangoh_gpioExp{{expander}}Pin{{gpio}}_IsInput
@@ -141,7 +142,7 @@ bool mangoh_gpioExp{{expander}}Pin{{gpio}}_IsInput
     void
 )
 {
-    return gpioExpander_IsInput(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_IsInput(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 mangoh_gpioExp{{expander}}Pin{{gpio}}_Polarity_t mangoh_gpioExp{{expander}}Pin{{gpio}}_GetPolarity
@@ -149,7 +150,7 @@ mangoh_gpioExp{{expander}}Pin{{gpio}}_Polarity_t mangoh_gpioExp{{expander}}Pin{{
     void
 )
 {
-    return gpioExpander_GetPolarity(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_GetPolarity(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 bool mangoh_gpioExp{{expander}}Pin{{gpio}}_IsActive
@@ -157,7 +158,7 @@ bool mangoh_gpioExp{{expander}}Pin{{gpio}}_IsActive
     void
 )
 {
-    return gpioExpander_IsActive(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_IsActive(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 mangoh_gpioExp{{expander}}Pin{{gpio}}_PullUpDown_t mangoh_gpioExp{{expander}}Pin{{gpio}}_GetPullUpDown
@@ -165,7 +166,7 @@ mangoh_gpioExp{{expander}}Pin{{gpio}}_PullUpDown_t mangoh_gpioExp{{expander}}Pin
     void
 )
 {
-    return gpioExpander_GetPullUpDown(&expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}]);
+    return gpioExpander_GetPullUpDown(&expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}]);
 }
 
 mangoh_gpioExp{{expander}}Pin{{gpio}}_ChangeEventHandlerRef_t mangoh_gpioExp{{expander}}Pin{{gpio}}_AddChangeEventHandler
@@ -177,8 +178,8 @@ mangoh_gpioExp{{expander}}Pin{{gpio}}_ChangeEventHandlerRef_t mangoh_gpioExp{{ex
 )
 {
     return (mangoh_gpioExp{{expander}}Pin{{gpio}}_ChangeEventHandlerRef_t)gpioExpander_AddChangeEventHandler(
-        &expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}],
-        &handlerRecords[EXPANDER_{{expander}}_INDEX][{{gpio}}],
+        &expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}],
+        &handlerRecords{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}],
         trigger,
         handlerPtr,
         contextPtr,
@@ -191,18 +192,22 @@ void mangoh_gpioExp{{expander}}Pin{{gpio}}_RemoveChangeEventHandler
 )
 {
     gpioExpander_RemoveChangeEventHandler(
-        &expanderPinSpecs[EXPANDER_{{expander}}_INDEX][{{gpio}}],
-        &handlerRecords[EXPANDER_{{expander}}_INDEX][{{gpio}}],
+        &expanderPinSpecs{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}],
+        &handlerRecords{% if expander %}[EXPANDER_{{expander}}_INDEX]{% endif %}[{{gpio}}],
         (gpioExpander_ChangeCallbackRef_t)ref);
 }
 """
 
-def generate():
-    for expander in range(1, 4):
+def generate(platform):
+    expanders = range(1, 4) if platform == 'green' else ['']
+    for expander in expanders:
         for gpio in range(16):
             t = jinja2.Template(code_block_template)
             print(t.render(expander=expander, gpio=gpio))
 
 if __name__ == '__main__':
-    generate()
+    if len(sys.argv) != 2 or (sys.argv[1] != 'green' and sys.argv[1] != 'red'):
+        print("This program expects 'red' or 'green' as an argument")
+        sys.exit(1)
+    generate(sys.argv[1])
 

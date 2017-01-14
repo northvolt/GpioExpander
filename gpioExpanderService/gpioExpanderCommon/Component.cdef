@@ -1,0 +1,10 @@
+sources:
+{
+    gpioExpander.c
+    i2cSwitch.c
+}
+
+cflags:
+{
+    "-std=c99"
+}

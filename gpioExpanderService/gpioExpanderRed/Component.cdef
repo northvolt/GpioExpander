@@ -1,0 +1,46 @@
+sources:
+{
+    expanderConfigurationRed.c
+}
+
+cflags:
+{
+    "-std=c99"
+    "-I${MANGOH_ROOT}/apps/GpioExpander/gpioExpanderService/gpioExpanderCommon"
+}
+
+requires:
+{
+    api:
+    {
+        expanderInterrupt = ${LEGATO_ROOT}/interfaces/le_gpio.api
+    }
+
+    component:
+    {
+        gpioExpanderCommon
+    }
+}
+
+provides:
+{
+    api:
+    {
+        mangoh_gpioExpPin0  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin1  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin2  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin3  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin4  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin5  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin6  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin7  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin8  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin9  = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin10 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin11 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin12 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin13 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin14 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_gpioExpPin15 = ${LEGATO_ROOT}/interfaces/le_gpio.api
+    }
+}
