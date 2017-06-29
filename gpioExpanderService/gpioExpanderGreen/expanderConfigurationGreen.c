@@ -12,7 +12,6 @@
 #include "legato.h"
 #include "interfaces.h"
 #include "gpioExpander.h"
-#include "i2cSwitch.h"
 
 
 #define I2C_SX1509_GPIO_EXPANDER1_ADDR      0x3E
@@ -49,58 +48,58 @@
 static const gpioExpander_PinSpec_t expanderPinSpecs[3][16] =
 {
     [EXPANDER_1_INDEX] = {
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 0 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 1 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 2 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 3 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 4 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 5 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 6 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 7 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 8 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 9 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 10 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 11 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 12 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 13 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 14 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 15 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 0 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 1 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 2 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 3 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 4 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 5 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 6 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 7 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 8 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 9 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 10 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 11 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 12 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 13 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 14 },
+        { .i2cBus = 5, .i2cAddr = I2C_SX1509_GPIO_EXPANDER1_ADDR, .pin = 15 },
     },
     [EXPANDER_2_INDEX] = {
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 0 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 1 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 2 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 3 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 4 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 5 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 6 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 7 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 8 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 9 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 10 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 11 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 12 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 13 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 14 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 15 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 0 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 1 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 2 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 3 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 4 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 5 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 6 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 7 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 8 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 9 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 10 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 11 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 12 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 13 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 14 },
+        { .i2cBus = 6, .i2cAddr = I2C_SX1509_GPIO_EXPANDER2_ADDR, .pin = 15 },
     },
     [EXPANDER_3_INDEX] = {
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 0 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 1 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 2 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 3 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 4 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 5 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 6 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 7 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 8 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 9 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 10 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 11 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 12 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 13 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 14 },
-        { .i2cBus = 0, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 15 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 0 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 1 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 2 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 3 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 4 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 5 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 6 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 7 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 8 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 9 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 10 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 11 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 12 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 13 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 14 },
+        { .i2cBus = 7, .i2cAddr = I2C_SX1509_GPIO_EXPANDER3_ADDR, .pin = 15 },
     },
 };
 
@@ -130,7 +129,7 @@ static void gpioExpander_Expander1InterruptHandler
 )
 {
     gpioExpander_GenericInterruptHandler(
-        0, I2C_SX1509_GPIO_EXPANDER1_ADDR, handlerRecords[EXPANDER_1_INDEX]);
+        5, I2C_SX1509_GPIO_EXPANDER1_ADDR, handlerRecords[EXPANDER_1_INDEX]);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -145,7 +144,7 @@ static void gpioExpander_Expander2InterruptHandler
 )
 {
     gpioExpander_GenericInterruptHandler(
-        0, I2C_SX1509_GPIO_EXPANDER2_ADDR, handlerRecords[EXPANDER_2_INDEX]);
+        6, I2C_SX1509_GPIO_EXPANDER2_ADDR, handlerRecords[EXPANDER_2_INDEX]);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -160,7 +159,7 @@ static void gpioExpander_Expander3InterruptHandler
 )
 {
     gpioExpander_GenericInterruptHandler(
-        0, I2C_SX1509_GPIO_EXPANDER3_ADDR, handlerRecords[EXPANDER_3_INDEX]);
+        7, I2C_SX1509_GPIO_EXPANDER3_ADDR, handlerRecords[EXPANDER_3_INDEX]);
 }
 
 
@@ -177,25 +176,10 @@ static void gpioExpander_Expander3InterruptHandler
 //--------------------------------------------------------------------------------------------------
 COMPONENT_INIT
 {
-    // Do not enable battery charger or USB hub ports.  It seems that enabling too many ports
-    // simultaneously can lead to i2c communication failures.
-    const uint8_t enablePorts = (
-        (1 << I2C_SW_PORT_IOT0) |
-        (1 << I2C_SW_PORT_IOT1) |
-        (1 << I2C_SW_PORT_IOT2) |
-        (1 << I2C_SW_PORT_GPIO_EXP1) |
-        (1 << I2C_SW_PORT_GPIO_EXP2) |
-        (1 << I2C_SW_PORT_GPIO_EXP3));
-    const int i2cBus = 0;
-    LE_DEBUG("Enabling PCA9548A I2C switch...");
-    LE_FATAL_IF(
-        ConfigureI2cSwitch(i2cBus, I2C_SWITCH_PCA9548A_ADDR, enablePorts) != LE_OK,
-        "Failed to configure the I2C switch");
-
     // Reset the GPIO expanders
-    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER2_ADDR);
-    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER1_ADDR);
-    gpioExpander_Reset(0, I2C_SX1509_GPIO_EXPANDER3_ADDR);
+    gpioExpander_Reset(6, I2C_SX1509_GPIO_EXPANDER2_ADDR);
+    gpioExpander_Reset(5, I2C_SX1509_GPIO_EXPANDER1_ADDR);
+    gpioExpander_Reset(7, I2C_SX1509_GPIO_EXPANDER3_ADDR);
 
     // Configure the interrupt that run from expander 2 to the CF3
     expander2Interrupt_EnablePullUp();
