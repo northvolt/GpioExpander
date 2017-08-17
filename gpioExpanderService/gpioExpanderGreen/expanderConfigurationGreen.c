@@ -20,24 +20,6 @@
 
 //--------------------------------------------------------------------------------------------------
 /**
- * I2C slave address of the I2C switch.
- *
- * @todo this device should not be controlled by this module.
- */
-//--------------------------------------------------------------------------------------------------
-#define I2C_SWITCH_PCA9548A_ADDR            0x71
-
-#define I2C_SW_PORT_IOT0         0
-#define I2C_SW_PORT_IOT1         1
-#define I2C_SW_PORT_IOT2         2
-#define I2C_SW_PORT_USB_HUB      3
-#define I2C_SW_PORT_GPIO_EXP1    4
-#define I2C_SW_PORT_GPIO_EXP2    5
-#define I2C_SW_PORT_GPIO_EXP3    6
-#define I2C_SW_PORT_BATT_CHARGER 7
-
-//--------------------------------------------------------------------------------------------------
-/**
  * Indicies of the expanders within the handler and pin spec arrays.
  */
 //--------------------------------------------------------------------------------------------------

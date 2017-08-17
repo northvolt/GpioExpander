@@ -13,21 +13,6 @@
 #include "interfaces.h"
 #include "gpioExpander.h"
 
-//--------------------------------------------------------------------------------------------------
-/**
- * I2C slave address of the I2C switch.
- *
- * @todo this device should not be controlled by this module.
- */
-//--------------------------------------------------------------------------------------------------
-#define I2C_SWITCH_PCA9548A_ADDR            0x71
-
-
-
-#define I2C_SW_PORT_IOT0                     0
-#define I2C_SW_PORT_USB_HUB_BATT_CHG         1
-#define I2C_SW_PORT_GPIO_EXP1                2
-#define I2C_SW_PORT_RASPBERRY_PI_COMP_HDR    3
 
 #define I2C_SX1509_GPIO_EXPANDER_ADDR       0x3E
 
