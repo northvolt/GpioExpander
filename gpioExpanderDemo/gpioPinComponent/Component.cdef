@@ -3,12 +3,12 @@ requires:
 {
     api:
     {
-        mangoh_cardDetect0Gpio = ${LEGATO_ROOT}/interfaces/le_gpio.api
-        mangoh_cardDetect1Gpio = ${LEGATO_ROOT}/interfaces/le_gpio.api
-        mangoh_cardDetect2Gpio = ${LEGATO_ROOT}/interfaces/le_gpio.api
-        mangoh_ledCardDetect0Gpio = ${LEGATO_ROOT}/interfaces/le_gpio.api
-        mangoh_ledCardDetect1Gpio = ${LEGATO_ROOT}/interfaces/le_gpio.api
-        mangoh_ledCardDetect2Gpio = ${LEGATO_ROOT}/interfaces/le_gpio.api
+        mangoh_cardDetect0Gpio = le_gpio.api
+        mangoh_cardDetect1Gpio = le_gpio.api
+        mangoh_cardDetect2Gpio = le_gpio.api
+        mangoh_ledCardDetect0Gpio = le_gpio.api
+        mangoh_ledCardDetect1Gpio = le_gpio.api
+        mangoh_ledCardDetect2Gpio = le_gpio.api
     }
 }
 
