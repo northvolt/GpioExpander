@@ -195,31 +195,42 @@ static uint8_t ExtractField(uint8_t data, uint8_t offset, uint8_t width);
 
 // High level functions
 static le_result_t Sx1509ReadPinField(
-    const gpioExpander_PinSpec_t* pin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     uint8_t baseReg,
     uint8_t fieldWidth,
     uint8_t *fieldData);
 static le_result_t Sx1509WritePinField(
-    const gpioExpander_PinSpec_t* pin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     uint8_t baseReg,
     uint8_t fieldWidth,
     uint8_t fieldData);
 
 // Helper functions used to implement the public functions
-static le_result_t EnableInterrupt(const gpioExpander_PinSpec_t *gpioPin, bool enable);
-static le_result_t WriteData(const gpioExpander_PinSpec_t *gpioPin, bool active);
+static le_result_t EnableInterrupt(
+    const gpioExpander_Identifier_t *expander, uint8_t pin, bool enable);
+static le_result_t WriteData(const gpioExpander_Identifier_t *expander, uint8_t pin, bool active);
 static le_result_t SetOutput(
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_OutputType_t outputType,
     gpioExpander_Polarity_t polarity,
     bool value);
 static le_result_t SetPullType(
-    const gpioExpander_PinSpec_t *gpioPin, gpioExpander_PullUpDown_t pullType);
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
+    gpioExpander_PullUpDown_t pullType);
 static le_result_t SetPolarity(
-    const gpioExpander_PinSpec_t *gpioPin, gpioExpander_Polarity_t polarity);
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
+    gpioExpander_Polarity_t polarity);
 static le_result_t SetOutputType(
-    const gpioExpander_PinSpec_t *gpioPin, gpioExpander_OutputType_t outputType);
-static le_result_t SetDirection(const gpioExpander_PinSpec_t *gpioPin, bool isInput);
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
+    gpioExpander_OutputType_t outputType);
+static le_result_t SetDirection(
+    const gpioExpander_Identifier_t *expander, uint8_t pin, bool isInput);
 
 
 //-------------------------------------------------------------------------------------------------
@@ -237,16 +248,17 @@ static le_result_t SetDirection(const gpioExpander_PinSpec_t *gpioPin, bool isIn
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_SetInput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity
 )
 {
-    if (SetPolarity(gpioPin, polarity) != LE_OK)
+    if (SetPolarity(expander, pin, polarity) != LE_OK)
     {
         return LE_FAULT;
     }
 
-    if (SetDirection(gpioPin, true) != LE_OK)
+    if (SetDirection(expander, pin, true) != LE_OK)
     {
         return LE_FAULT;
     }
@@ -265,12 +277,13 @@ le_result_t gpioExpander_SetInput
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_SetPushPullOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity,
     bool value
 )
 {
-    return SetOutput(gpioPin, GPIO_EXPANDER_OUTPUT_TYPE_PUSH_PULL, polarity, value);
+    return SetOutput(expander, pin, GPIO_EXPANDER_OUTPUT_TYPE_PUSH_PULL, polarity, value);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -288,12 +301,13 @@ le_result_t gpioExpander_SetPushPullOutput
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_SetTriStateOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity
 )
 {
     // TODO: implement tristate
-    //return SetOutput(gpioPin, GPIO_EXPANDER_OUTPUT_TYPE_TRISTATE, polarity, value);
+    //return SetOutput(expander, pin, GPIO_EXPANDER_OUTPUT_TYPE_TRISTATE, polarity, value);
     return LE_NOT_IMPLEMENTED;
 }
 
@@ -308,12 +322,13 @@ le_result_t gpioExpander_SetTriStateOutput
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_SetOpenDrainOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity,
     bool value
 )
 {
-    return SetOutput(gpioPin, GPIO_EXPANDER_OUTPUT_TYPE_OPEN_DRAIN, polarity, value);
+    return SetOutput(expander, pin, GPIO_EXPANDER_OUTPUT_TYPE_OPEN_DRAIN, polarity, value);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -327,10 +342,11 @@ le_result_t gpioExpander_SetOpenDrainOutput
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_EnablePullUp
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return SetPullType(gpioPin, GPIO_EXPANDER_PULL_UP);
+    return SetPullType(expander, pin, GPIO_EXPANDER_PULL_UP);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -344,10 +360,11 @@ le_result_t gpioExpander_EnablePullUp
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_EnablePullDown
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return SetPullType(gpioPin, GPIO_EXPANDER_PULL_DOWN);
+    return SetPullType(expander, pin, GPIO_EXPANDER_PULL_DOWN);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -361,10 +378,11 @@ le_result_t gpioExpander_EnablePullDown
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_DisableResistors
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return SetPullType(gpioPin, GPIO_EXPANDER_PULL_OFF);
+    return SetPullType(expander, pin, GPIO_EXPANDER_PULL_OFF);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -378,10 +396,11 @@ le_result_t gpioExpander_DisableResistors
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_Activate
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return WriteData(gpioPin, true);
+    return WriteData(expander, pin, true);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -395,10 +414,11 @@ le_result_t gpioExpander_Activate
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_Deactivate
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return WriteData(gpioPin, false);
+    return WriteData(expander, pin, false);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -414,7 +434,8 @@ le_result_t gpioExpander_Deactivate
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_SetHighZ
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
     // TODO: implement
@@ -433,13 +454,15 @@ le_result_t gpioExpander_SetHighZ
 //--------------------------------------------------------------------------------------------------
 bool gpioExpander_Read
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
     const uint8_t dataFieldWidth = 1;
     uint8_t readVal;
     const le_result_t r = Sx1509ReadPinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_DATA_A,
         dataFieldWidth,
         &readVal);
@@ -468,7 +491,8 @@ bool gpioExpander_Read
 //--------------------------------------------------------------------------------------------------
 gpioExpander_ChangeCallbackRef_t gpioExpander_AddChangeEventHandler
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_HandlerRecord_t *handlerRecord,
     gpioExpander_Edge_t edge,
     gpioExpander_ChangeCallbackFunc_t handlerPtr,
@@ -481,9 +505,9 @@ gpioExpander_ChangeCallbackRef_t gpioExpander_AddChangeEventHandler
         LE_KILL_CLIENT(
             "Attempted to register a second handler for GPIO expander on I2C bus %d at address "
             "0x%x for pin %d",
-            gpioPin->i2cBus,
-            gpioPin->i2cAddr,
-            gpioPin->pin);
+            expander->i2cBus,
+            expander->i2cAddr,
+            pin);
     }
     handlerRecord->handlerPtr = handlerPtr;
     handlerRecord->contextPtr = contextPtr;
@@ -492,10 +516,10 @@ gpioExpander_ChangeCallbackRef_t gpioExpander_AddChangeEventHandler
     // function can't return anything except an opaque reference, so we have no way of signalling
     // failure to the client.
     LE_FATAL_IF(
-        gpioExpander_SetEdgeSense(gpioPin, edge) != LE_OK,
+        gpioExpander_SetEdgeSense(expander, pin, edge) != LE_OK,
         "Failed to set edge sense during event handler registration");
     LE_FATAL_IF(
-        EnableInterrupt(gpioPin, true) != LE_OK,
+        EnableInterrupt(expander, pin, true) != LE_OK,
         "Failed to enable interrupt during event handler registration");
 
     return (gpioExpander_ChangeCallbackRef_t)handlerRecord;
@@ -511,7 +535,8 @@ gpioExpander_ChangeCallbackRef_t gpioExpander_AddChangeEventHandler
 //--------------------------------------------------------------------------------------------------
 void gpioExpander_RemoveChangeEventHandler
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_HandlerRecord_t *handlerRecord,
     gpioExpander_ChangeCallbackRef_t ref
 )
@@ -527,7 +552,7 @@ void gpioExpander_RemoveChangeEventHandler
 
     // TODO: As above, need a better way to signal failure to the user
     LE_FATAL_IF(
-        EnableInterrupt(gpioPin, false) != LE_OK,
+        EnableInterrupt(expander, pin, false) != LE_OK,
         "Failed to disable interrupt during event handler deregistration");
 }
 
@@ -546,13 +571,15 @@ void gpioExpander_RemoveChangeEventHandler
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_SetEdgeSense
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Edge_t trigger ///< Change(s) that should trigger the callback to be called.
 )
 {
     const uint8_t edgeSenseFieldWidth = 2;
     le_result_t r = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_SENSE_LOW_A,
         edgeSenseFieldWidth,
         trigger);
@@ -579,13 +606,15 @@ le_result_t gpioExpander_SetEdgeSense
 //--------------------------------------------------------------------------------------------------
 gpioExpander_Edge_t gpioExpander_GetEdgeSense
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
     const uint8_t edgeSenseFieldWidth = 2;
     gpioExpander_Edge_t edge = 0;
     const le_result_t r = Sx1509ReadPinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_SENSE_LOW_A,
         edgeSenseFieldWidth,
         (uint8_t *)&edge);
@@ -607,10 +636,11 @@ gpioExpander_Edge_t gpioExpander_GetEdgeSense
 //--------------------------------------------------------------------------------------------------
 le_result_t gpioExpander_DisableEdgeSense
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return gpioExpander_SetEdgeSense(gpioPin, GPIO_EXPANDER_EDGE_NONE);
+    return gpioExpander_SetEdgeSense(expander, pin, GPIO_EXPANDER_EDGE_NONE);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -623,13 +653,15 @@ le_result_t gpioExpander_DisableEdgeSense
 //--------------------------------------------------------------------------------------------------
 bool gpioExpander_IsOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
     const uint8_t directionFieldWidth = 1;
     Sx1509_Direction_t direction;
     const le_result_t r = Sx1509ReadPinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_DIR_A,
         directionFieldWidth,
         (uint8_t *)&direction);
@@ -650,10 +682,11 @@ bool gpioExpander_IsOutput
 //--------------------------------------------------------------------------------------------------
 bool gpioExpander_IsInput
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return !gpioExpander_IsOutput(gpioPin);
+    return !gpioExpander_IsOutput(expander, pin);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -666,13 +699,15 @@ bool gpioExpander_IsInput
 //--------------------------------------------------------------------------------------------------
 gpioExpander_Polarity_t gpioExpander_GetPolarity
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
     const uint8_t polarityFieldWidth = 1;
     Sx1509_Polarity_t polarity = 0;
     const le_result_t r = Sx1509ReadPinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_POLARITY_A,
         polarityFieldWidth,
         (uint8_t *)&polarity);
@@ -698,10 +733,11 @@ gpioExpander_Polarity_t gpioExpander_GetPolarity
 //--------------------------------------------------------------------------------------------------
 bool gpioExpander_IsActive
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
-    return gpioExpander_Read(gpioPin);
+    return gpioExpander_Read(expander, pin);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -714,19 +750,22 @@ bool gpioExpander_IsActive
 //--------------------------------------------------------------------------------------------------
 gpioExpander_PullUpDown_t gpioExpander_GetPullUpDown
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 )
 {
     const uint8_t pullFieldWidth = 1;
     uint8_t pullUpEnabled;
     uint8_t pullDownEnabled;
     const le_result_t pullUpResult = Sx1509ReadPinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_PULL_UP_A,
         pullFieldWidth,
         &pullUpEnabled);
     const le_result_t pullDownResult = Sx1509ReadPinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_PULL_DOWN_A,
         pullFieldWidth,
         &pullDownEnabled);
@@ -764,8 +803,7 @@ gpioExpander_PullUpDown_t gpioExpander_GetPullUpDown
 //--------------------------------------------------------------------------------------------------
 void gpioExpander_Reset
 (
-    uint8_t expanderI2cBus,
-    uint8_t expanderI2cAddress
+    const gpioExpander_Identifier_t *expander  ///< I2C identifier for the GPIO expander
 )
 {
     const uint8_t magicResetVals[] = { 0x12, 0x34 };
@@ -773,10 +811,10 @@ void gpioExpander_Reset
     {
         LE_FATAL_IF(
             SmbusWriteReg(
-                expanderI2cBus, expanderI2cAddress, SX1509_REG_RESET, magicResetVals[i]) != LE_OK,
+                expander->i2cBus, expander->i2cAddr, SX1509_REG_RESET, magicResetVals[i]) != LE_OK,
             "Failed to reset GPIO expander on I2C bus %d at address 0x%x",
-            expanderI2cBus,
-            expanderI2cAddress);
+            expander->i2cBus,
+            expander->i2cAddr);
     }
 }
 
@@ -789,8 +827,7 @@ void gpioExpander_Reset
 //--------------------------------------------------------------------------------------------------
 void gpioExpander_GenericInterruptHandler
 (
-    uint8_t expanderI2cBus,
-    uint8_t expanderI2cAddress,
+    const gpioExpander_Identifier_t *expander,
     const gpioExpander_HandlerRecord_t *handlers
 )
 {
@@ -798,13 +835,13 @@ void gpioExpander_GenericInterruptHandler
     uint8_t statusA;
     uint8_t statusB;
     le_result_t result = SmbusReadReg(
-        expanderI2cBus, expanderI2cAddress, SX1509_REG_EVENT_STATUS_B, &statusB);
+        expander->i2cBus, expander->i2cAddr, SX1509_REG_EVENT_STATUS_B, &statusB);
     if (result != LE_OK)
     {
         // TODO: What should we do if the read fails?
     }
     result = SmbusReadReg(
-        expanderI2cBus, expanderI2cAddress, SX1509_REG_EVENT_STATUS_A, &statusA);
+        expander->i2cBus, expander->i2cAddr, SX1509_REG_EVENT_STATUS_A, &statusA);
     if (result != LE_OK)
     {
         // TODO: What should we do if the read fails?
@@ -813,8 +850,8 @@ void gpioExpander_GenericInterruptHandler
 
     // Clear the interrupt status for all GPIOs on the expander
     result = SmbusWriteReg(
-        expanderI2cBus,
-        expanderI2cAddress,
+        expander->i2cBus,
+        expander->i2cAddr,
         SX1509_REG_EVENT_STATUS_B,
         statusB);
     if (result != LE_OK)
@@ -822,8 +859,8 @@ void gpioExpander_GenericInterruptHandler
         // TODO: What should we do if the write fails?
     }
     result = SmbusWriteReg(
-        expanderI2cBus,
-        expanderI2cAddress,
+        expander->i2cBus,
+        expander->i2cAddr,
         SX1509_REG_EVENT_STATUS_A,
         statusA);
     if (result != LE_OK)
@@ -837,7 +874,7 @@ void gpioExpander_GenericInterruptHandler
     if (statusB != 0)
     {
         result = SmbusReadReg(
-            expanderI2cBus, expanderI2cAddress, SX1509_REG_DATA_B, &dataB);
+            expander->i2cBus, expander->i2cAddr, SX1509_REG_DATA_B, &dataB);
         if (result != LE_OK)
         {
             // TODO: What should we do if the read fails?
@@ -846,7 +883,7 @@ void gpioExpander_GenericInterruptHandler
     if (statusA != 0)
     {
         result = SmbusReadReg(
-            expanderI2cBus, expanderI2cAddress, SX1509_REG_DATA_A, &dataA);
+            expander->i2cBus, expander->i2cAddr, SX1509_REG_DATA_A, &dataA);
         if (result != LE_OK)
         {
             // TODO: What should we do if the read fails?
@@ -866,6 +903,33 @@ void gpioExpander_GenericInterruptHandler
             (*(handler->handlerPtr))(gpioActive, handler->contextPtr);
         }
     }
+}
+
+le_result_t gpioExpander_DiscoverPrimaryI2cBusNum
+(
+    uint8_t *busNum  ///< [OUT] Primary I2C bus number
+)
+{
+    const char *prefix = "/dev/i2c-";
+    const uint8_t numsToTry[] = {0, 4};
+    char path[16];
+
+    for (int i = 0; i < NUM_ARRAY_MEMBERS(numsToTry); i++)
+    {
+        struct stat statBuf = {};
+        const int formattedStringLen = snprintf(path, sizeof(path), "%s%d", prefix, numsToTry[i]);
+        LE_ASSERT(formattedStringLen < NUM_ARRAY_MEMBERS(path));
+        if (stat(path, &statBuf) == 0)
+        {
+            if (S_ISCHR(statBuf.st_mode))
+            {
+                *busNum = numsToTry[i];
+                return LE_OK;
+            }
+        }
+    }
+
+    return LE_NOT_FOUND;
 }
 
 
@@ -1128,7 +1192,8 @@ static uint8_t ExtractField(
  */
 //--------------------------------------------------------------------------------------------------
 static le_result_t Sx1509ReadPinField(
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     uint8_t baseReg,                       ///< [IN] Register containing the field for pin 0
     uint8_t fieldWidth,                    ///< [IN] Width of the field in bits
     uint8_t *fieldData                     ///< [OUT] The extracted field data shifted into the
@@ -1137,10 +1202,10 @@ static le_result_t Sx1509ReadPinField(
 {
     uint8_t reg;
     uint8_t fieldOffset;
-    Sx1509ComputePinFieldAccessParameters(baseReg, gpioPin->pin, fieldWidth, &reg, &fieldOffset);
+    Sx1509ComputePinFieldAccessParameters(baseReg, pin, fieldWidth, &reg, &fieldOffset);
 
     uint8_t data;
-    le_result_t r = SmbusReadReg(gpioPin->i2cBus, gpioPin->i2cAddr, reg, &data);
+    le_result_t r = SmbusReadReg(expander->i2cBus, expander->i2cAddr, reg, &data);
     if (r != LE_OK)
     {
         LE_ERROR("Failed to read pin field");
@@ -1161,7 +1226,8 @@ static le_result_t Sx1509ReadPinField(
  */
 //--------------------------------------------------------------------------------------------------
 static le_result_t Sx1509WritePinField(
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     uint8_t baseReg,                       ///< [IN] Register containing the field for pin 0
     uint8_t fieldWidth,                    ///< [IN] Width of the field in bits
     uint8_t fieldData                      ///< [IN] Data to write into the field.  The data should
@@ -1170,11 +1236,11 @@ static le_result_t Sx1509WritePinField(
 {
     uint8_t reg;
     uint8_t fieldOffset;
-    Sx1509ComputePinFieldAccessParameters(baseReg, gpioPin->pin, fieldWidth, &reg, &fieldOffset);
+    Sx1509ComputePinFieldAccessParameters(baseReg, pin, fieldWidth, &reg, &fieldOffset);
 
     le_result_t r = SmbusReadModifyWrite(
-        gpioPin->i2cBus,
-        gpioPin->i2cAddr,
+        expander->i2cBus,
+        expander->i2cAddr,
         reg,
         fieldData << fieldOffset,
         CreateMask(fieldWidth) << fieldOffset);
@@ -1198,13 +1264,15 @@ static le_result_t Sx1509WritePinField(
 //--------------------------------------------------------------------------------------------------
 static le_result_t EnableInterrupt
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     bool enable
 )
 {
     const uint8_t interruptMaskFieldWidth = 1;
     le_result_t r = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_INTERRUPT_MASK_A,
         interruptMaskFieldWidth,
         enable ? 0 : 1);
@@ -1228,14 +1296,16 @@ static le_result_t EnableInterrupt
 //--------------------------------------------------------------------------------------------------
 static le_result_t WriteData
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     bool active                            ///< [IN] If true set output to active otherwise set the
                                            ///  output to incactive
 )
 {
     const uint8_t dataFieldWidth = 1;
     le_result_t r = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_DATA_A,
         dataFieldWidth,
         active ? 1 : 0);
@@ -1260,29 +1330,30 @@ static le_result_t WriteData
 //--------------------------------------------------------------------------------------------------
 static le_result_t SetOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_OutputType_t outputType,  ///< [IN] Type of output to configure the GPIO as
     gpioExpander_Polarity_t polarity,      ///< [IN] Active-high or active-low.
     bool value                             ///< [IN] Initial value to drive (true=active,
                                            ///  false=inactive)
 )
 {
-    if (SetOutputType(gpioPin, outputType) != LE_OK)
+    if (SetOutputType(expander, pin, outputType) != LE_OK)
     {
         return LE_FAULT;
     }
 
-    if (SetPolarity(gpioPin, polarity) != LE_OK)
+    if (SetPolarity(expander, pin, polarity) != LE_OK)
     {
         return LE_FAULT;
     }
 
-    if (WriteData(gpioPin, value) != LE_OK)
+    if (WriteData(expander, pin, value) != LE_OK)
     {
         return LE_FAULT;
     }
 
-    if (SetDirection(gpioPin, false) != LE_OK)
+    if (SetDirection(expander, pin, false) != LE_OK)
     {
         return LE_FAULT;
     }
@@ -1305,7 +1376,8 @@ static le_result_t SetOutput
 //--------------------------------------------------------------------------------------------------
 static le_result_t SetPullType
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_PullUpDown_t pullType
 )
 {
@@ -1322,12 +1394,14 @@ static le_result_t SetPullType
 
     const uint8_t pullFieldWidth = 1;
     const le_result_t pullUpResult = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_PULL_UP_A,
         pullFieldWidth,
         pullUpVal);
     const le_result_t pullDownResult = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_PULL_DOWN_A,
         pullFieldWidth,
         pullDownVal);
@@ -1352,13 +1426,15 @@ static le_result_t SetPullType
 //--------------------------------------------------------------------------------------------------
 static le_result_t SetPolarity
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity       ///< [IN] Polarity to set the GPIO to
 )
 {
     const uint8_t polarityFieldWidth = 1;
     const le_result_t r = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_POLARITY_A,
         polarityFieldWidth,
         polarity == GPIO_EXPANDER_ACTIVE_HIGH ? SX1509_POLARITY_NORMAL : SX1509_POLARITY_INVERTED);
@@ -1387,7 +1463,8 @@ static le_result_t SetPolarity
 //--------------------------------------------------------------------------------------------------
 static le_result_t SetOutputType
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_OutputType_t outputType   ///< [IN] Output type to configure the GPIO as
 )
 {
@@ -1407,7 +1484,8 @@ static le_result_t SetOutputType
     }
 
     const le_result_t r = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_OPEN_DRAIN_A,
         openDrainFieldWidth,
         outputType == GPIO_EXPANDER_OUTPUT_TYPE_OPEN_DRAIN ? 1 : 0);
@@ -1432,7 +1510,8 @@ static le_result_t SetOutputType
 //--------------------------------------------------------------------------------------------------
 static le_result_t SetDirection
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     bool isInput                           ///< [IN] true if the GPIO is to be configured as an
                                            ///  input or false if the GPIO is to be configured as
                                            ///  an output
@@ -1440,7 +1519,8 @@ static le_result_t SetDirection
 {
     const uint8_t directionFieldWidth = 1;
     const le_result_t r = Sx1509WritePinField(
-        gpioPin,
+        expander,
+        pin,
         SX1509_REG_DIR_A,
         directionFieldWidth,
         isInput ? SX1509_DIRECTION_INPUT : SX1509_DIRECTION_OUTPUT);

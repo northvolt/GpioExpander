@@ -3,8 +3,8 @@
  * @file
  *
  * This module contains functions which are the same as those specified by le_gpio.api except that
- * they take an additional gpioExpander_PinSpec_t parameter.  These functions exist so that the
- * implementation of le_gpio.api for the GPIO expander can be as compact as possible.  This is
+ * they take additional gpioExpander_Identifier_t and pin parameters. These functions exist so that
+ * the implementation of le_gpio.api for the GPIO expander can be as compact as possible. This is
  * important because each function in the API must be implemented for every GPIO on the expander.
  *
  * <HR>
@@ -31,15 +31,14 @@ typedef void (*gpioExpander_ChangeCallbackFunc_t)
 
 //--------------------------------------------------------------------------------------------------
 /**
- * The location specification of a GPIO on a GPIO expander
+ * The location specification of a GPIO expander
  */
 //--------------------------------------------------------------------------------------------------
 typedef struct
 {
     uint8_t i2cBus;  ///< I2C bus that the GPIO expander is on
     uint8_t i2cAddr; ///< I2C address of the GPIO expander
-    uint8_t pin;     ///< GPIO being referenced.  Should be in the range of 0 to 15.
-} gpioExpander_PinSpec_t;
+} gpioExpander_Identifier_t;
 
 //--------------------------------------------------------------------------------------------------
 /**
@@ -112,7 +111,8 @@ typedef enum
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_SetInput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity
 );
 
@@ -123,7 +123,8 @@ LE_SHARED le_result_t gpioExpander_SetInput
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_SetPushPullOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity,
     bool value
 );
@@ -135,7 +136,8 @@ LE_SHARED le_result_t gpioExpander_SetPushPullOutput
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_SetTriStateOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity
 );
 
@@ -146,7 +148,8 @@ LE_SHARED le_result_t gpioExpander_SetTriStateOutput
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_SetOpenDrainOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Polarity_t polarity,
     bool value
 );
@@ -158,7 +161,8 @@ LE_SHARED le_result_t gpioExpander_SetOpenDrainOutput
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_EnablePullUp
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -168,7 +172,8 @@ LE_SHARED le_result_t gpioExpander_EnablePullUp
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_EnablePullDown
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -178,7 +183,8 @@ LE_SHARED le_result_t gpioExpander_EnablePullDown
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_DisableResistors
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -188,7 +194,8 @@ LE_SHARED le_result_t gpioExpander_DisableResistors
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_Activate
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -198,7 +205,8 @@ LE_SHARED le_result_t gpioExpander_Activate
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_Deactivate
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -208,7 +216,8 @@ LE_SHARED le_result_t gpioExpander_Deactivate
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_SetHighZ
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -218,7 +227,8 @@ LE_SHARED le_result_t gpioExpander_SetHighZ
 //--------------------------------------------------------------------------------------------------
 LE_SHARED bool gpioExpander_Read
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -228,7 +238,8 @@ LE_SHARED bool gpioExpander_Read
 //--------------------------------------------------------------------------------------------------
 LE_SHARED gpioExpander_ChangeCallbackRef_t gpioExpander_AddChangeEventHandler
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_HandlerRecord_t *handlerRecord,
     gpioExpander_Edge_t trigger,
     gpioExpander_ChangeCallbackFunc_t handlerPtr,
@@ -243,7 +254,8 @@ LE_SHARED gpioExpander_ChangeCallbackRef_t gpioExpander_AddChangeEventHandler
 //--------------------------------------------------------------------------------------------------
 LE_SHARED void gpioExpander_RemoveChangeEventHandler
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_HandlerRecord_t *handlerRecord,
     gpioExpander_ChangeCallbackRef_t ref
 );
@@ -255,7 +267,8 @@ LE_SHARED void gpioExpander_RemoveChangeEventHandler
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_SetEdgeSense
 (
-    const gpioExpander_PinSpec_t *gpioPin,
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin,
     gpioExpander_Edge_t trigger
 );
 
@@ -266,7 +279,8 @@ LE_SHARED le_result_t gpioExpander_SetEdgeSense
 //--------------------------------------------------------------------------------------------------
 LE_SHARED gpioExpander_Edge_t gpioExpander_GetEdgeSense
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -276,7 +290,8 @@ LE_SHARED gpioExpander_Edge_t gpioExpander_GetEdgeSense
 //--------------------------------------------------------------------------------------------------
 LE_SHARED le_result_t gpioExpander_DisableEdgeSense
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -286,7 +301,8 @@ LE_SHARED le_result_t gpioExpander_DisableEdgeSense
 //--------------------------------------------------------------------------------------------------
 LE_SHARED bool gpioExpander_IsOutput
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -296,7 +312,8 @@ LE_SHARED bool gpioExpander_IsOutput
 //--------------------------------------------------------------------------------------------------
 LE_SHARED bool gpioExpander_IsInput
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -306,7 +323,8 @@ LE_SHARED bool gpioExpander_IsInput
 //--------------------------------------------------------------------------------------------------
 LE_SHARED gpioExpander_Polarity_t gpioExpander_GetPolarity
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -316,7 +334,8 @@ LE_SHARED gpioExpander_Polarity_t gpioExpander_GetPolarity
 //--------------------------------------------------------------------------------------------------
 LE_SHARED bool gpioExpander_IsActive
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -326,7 +345,8 @@ LE_SHARED bool gpioExpander_IsActive
 //--------------------------------------------------------------------------------------------------
 LE_SHARED gpioExpander_PullUpDown_t gpioExpander_GetPullUpDown
 (
-    const gpioExpander_PinSpec_t *gpioPin
+    const gpioExpander_Identifier_t *expander,
+    uint8_t pin
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -338,8 +358,7 @@ LE_SHARED gpioExpander_PullUpDown_t gpioExpander_GetPullUpDown
 //--------------------------------------------------------------------------------------------------
 LE_SHARED void gpioExpander_Reset
 (
-    uint8_t expanderI2cBus,
-    uint8_t expanderI2cAddress
+    const gpioExpander_Identifier_t *expander  ///< I2C identifier for the GPIO expander
 );
 
 //--------------------------------------------------------------------------------------------------
@@ -350,9 +369,18 @@ LE_SHARED void gpioExpander_Reset
 //--------------------------------------------------------------------------------------------------
 LE_SHARED void gpioExpander_GenericInterruptHandler
 (
-    uint8_t expanderI2cBus,                       ///< I2C bus that the GPIO expander is on
-    uint8_t expanderI2cAddress,                   ///< I2C address of the GPIO expander
+    const gpioExpander_Identifier_t *expander,    ///< I2C identifier for the GPIO expander
     const gpioExpander_HandlerRecord_t *handlers  ///< An array of 16 handler records
+);
+
+//--------------------------------------------------------------------------------------------------
+/**
+ * Attempt to discover the primary I2C bus number of the system.
+ */
+//--------------------------------------------------------------------------------------------------
+LE_SHARED le_result_t gpioExpander_DiscoverPrimaryI2cBusNum
+(
+    uint8_t *busNum  ///< [OUT] Primary I2C bus number
 );
 
 
