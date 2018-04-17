@@ -20,12 +20,7 @@
 
 #include "legato.h"
 #include "gpioExpander.h"
-// On yocto the file has a different non-standard name.
-#ifdef LEGATO_EMBEDDED
-#include <linux/i2c-dev-user.h>
-#else
-#include <linux/i2c-dev.h>
-#endif
+#include "i2c-utils.h"
 
 //--------------------------------------------------------------------------------------------------
 /**
